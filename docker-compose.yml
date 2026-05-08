@@ -309,7 +309,7 @@ services:
       NC_AUTH_JWT_SECRET: ${NOCODB_JWT_SECRET}
       NC_DB: pg://postgres:5432?u=postgres&p=${POSTGRES_PASSWORD}&d=nocodb
       NC_PUBLIC_URL: https://${NOCODB_HOSTNAME}
-      NC_REDIS_URL: redis://redis:6379
+      NC_REDIS_URL: redis://redis:6379/1
     volumes:
       - nocodb_data:/usr/app/data
     healthcheck:

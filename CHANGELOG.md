@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **NocoDB** - Fix Redis queue conflict with n8n by isolating NocoDB to Redis db1 (both used Bull queue with name `jobs` in db0, causing cross-contamination of jobs)
+
 ## [1.4.3] - 2026-04-27
 
 ### Fixed
