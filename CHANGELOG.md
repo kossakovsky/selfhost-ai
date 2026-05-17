@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-17
+
+### Fixed
+- **cAdvisor** - Fix memory leak and uncontrolled CPU growth (up to ~3.5 GB RAM / 168% CPU on hosts with ~40+ containers) by pinning image to `v0.57.0`, adding resource limits (`mem_limit: 1g`, `cpus: "1.0"`), and tuning runtime flags (`--housekeeping_interval=10s`, `--docker_only=true`).
+
 ## [1.4.3] - 2026-04-27
 
 ### Fixed

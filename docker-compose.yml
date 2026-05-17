@@ -667,10 +667,16 @@ services:
       - 9100
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.57.0
     container_name: cadvisor
     profiles: ["monitoring"]
     restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 256m
+    cpus: "1.0"
+    command:
+      - --housekeeping_interval=10s
+      - --docker_only=true
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
