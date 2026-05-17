@@ -6,6 +6,7 @@
 
 ### Fixed
 - **cAdvisor** - Fix memory leak and uncontrolled CPU growth (up to ~3.5 GB RAM / 168% CPU on hosts with ~40+ containers) by pinning image to `v0.57.0`, adding resource limits (`mem_limit: 1g`, `cpus: "1.0"`), and tuning runtime flags (`--housekeeping_interval=10s`, `--docker_only=true`).
+- **NocoDB** - Fix `Missing process handler for job type job` errors in n8n queue caused by NocoDB sharing the default Bull queue `jobs` with n8n in Redis db0. NocoDB is now isolated to Redis db1 via `NC_REDIS_URL=redis://redis:6379/1`.
 
 ## [1.4.3] - 2026-04-27
 
