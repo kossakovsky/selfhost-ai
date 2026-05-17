@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-17
+
+### Fixed
+- **cAdvisor** - Fix memory leak and uncontrolled CPU growth (up to ~3.5 GB RAM / 168% CPU on hosts with ~40+ containers) by pinning image to `v0.55.1`, adding resource limits (`mem_limit: 1g`, `cpus: "1.0"`), and tuning runtime flags (`--housekeeping_interval=10s`, `--docker_only=true`).
+- **NocoDB** - Fix `Missing process handler for job type job` errors in n8n queue caused by NocoDB sharing the default Bull queue `jobs` with n8n in Redis db0. NocoDB is now isolated to Redis db1 via `NC_REDIS_URL=redis://redis:6379/1`.
+- **Dify** - Fix install never starting (`could not translate host name "db_postgres"`) by activating Dify's bundled compose profiles (`postgresql`, `weaviate`) when starting the stack, and passing all Dify profiles when tearing it down so containers like `db_postgres` and `weaviate` get stopped cleanly (#61).
+- **n8n** - Namespace Bull queue (`QUEUE_BULL_PREFIX=n8n`) to prevent neighbour conflicts, raise task runner timeout to 300s, and disable runner auto-shutdown to fix `Missing process handler` and `Task request timed out` errors. Default `N8N_RUNNERS_MAX_CONCURRENCY` raised 5 → 10. All four values configurable via `.env`.
+
 ## [1.4.3] - 2026-04-27
 
 ### Fixed
