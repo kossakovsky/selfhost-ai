@@ -33,7 +33,7 @@ Add service block in `services:` section (maintain alphabetical order):
         max-file: "1"
     environment:
       # Service-specific env vars
-      SOME_VAR: ${SOME_VAR:-default}
+      SOME_VAR: "${SOME_VAR:-default}"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:<PORT>/health || exit 1"]
       interval: 30s
@@ -51,10 +51,10 @@ Add to `caddy` service `environment:` section (if externally accessible):
   caddy:
     environment:
       # ... existing vars ...
-      - ${SERVICE_NAME_UPPER}_HOSTNAME=${${SERVICE_NAME_UPPER}_HOSTNAME}
+      ${SERVICE_NAME_UPPER}_HOSTNAME: "${${SERVICE_NAME_UPPER}_HOSTNAME}"
       # If using basic auth:
-      - ${SERVICE_NAME_UPPER}_USERNAME=${${SERVICE_NAME_UPPER}_USERNAME}
-      - ${SERVICE_NAME_UPPER}_PASSWORD_HASH=${${SERVICE_NAME_UPPER}_PASSWORD_HASH}
+      ${SERVICE_NAME_UPPER}_USERNAME: "${${SERVICE_NAME_UPPER}_USERNAME}"
+      ${SERVICE_NAME_UPPER}_PASSWORD_HASH: "${${SERVICE_NAME_UPPER}_PASSWORD_HASH}"
 ```
 
 ### 1.3 Named Volume (if persistent storage needed)
@@ -115,7 +115,7 @@ This script:
 Example in docker-compose.yml:
 ```yaml
 environment:
-  DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/new_data_base_name
+  DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/new_data_base_name"
   # OR individual vars:
   POSTGRES_HOST: postgres
   POSTGRES_DATABASE: new_data_base_name

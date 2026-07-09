@@ -5,6 +5,9 @@
 ### Added
 - **Cloudflare Tunnel** - Configurable transport protocol via `CLOUDFLARE_TUNNEL_PROTOCOL` in `.env`: `auto` (default, prefers QUIC with HTTP/2 fallback), `quic`, or `http2`. Set `http2` if your ISP or firewall blocks UDP and the tunnel is unstable (#69).
 
+### Changed
+- **Docker Compose** - Wrap all `${VARIABLE}` interpolations in double quotes to guard against YAML parsing issues with special characters in inline default values and keep the quoting style consistent across the file. No functional change: the rendered `docker compose config` output is identical (#70).
+
 ## [1.6.0] - 2026-07-01
 
 ### Added

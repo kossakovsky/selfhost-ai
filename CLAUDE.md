@@ -278,6 +278,7 @@ depends_on:
 - All hostnames end with `_HOSTNAME`
 - Password hashes end with `_PASSWORD_HASH`
 - Use `${VAR:-default}` for optional vars with defaults
+- Always wrap `${VAR}` interpolations in `docker-compose.yml` in double quotes: `"${VAR:-default}"`
 
 ### Profile Activation Logic
 
@@ -293,9 +294,9 @@ fi
 Services making outbound HTTP requests to AI APIs (OpenAI, Anthropic, etc.) should use the shared proxy anchor:
 ```yaml
 x-proxy-env: &proxy-env
-  HTTP_PROXY: ${GOST_PROXY_URL:-}
-  HTTPS_PROXY: ${GOST_PROXY_URL:-}
-  NO_PROXY: ${GOST_NO_PROXY:-}
+  HTTP_PROXY: "${GOST_PROXY_URL:-}"
+  HTTPS_PROXY: "${GOST_PROXY_URL:-}"
+  NO_PROXY: "${GOST_NO_PROXY:-}"
 
 services:
   myservice:
