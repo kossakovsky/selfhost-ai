@@ -119,6 +119,17 @@ if is_profile_active "cpu" || is_profile_active "gpu-nvidia" || is_profile_activ
     check_image_update "ollama" "ollama/ollama:latest"
 fi
 
+if is_profile_active "invokeai-nvidia"; then
+    log_subheader "InvokeAI"
+    check_image_update "invokeai" "ghcr.io/invoke-ai/invokeai:latest"
+elif is_profile_active "invokeai-amd"; then
+    log_subheader "InvokeAI"
+    check_image_update "invokeai" "ghcr.io/invoke-ai/invokeai:main-rocm"
+elif is_profile_active "invokeai-cpu"; then
+    log_subheader "InvokeAI"
+    check_image_update "invokeai" "ghcr.io/invoke-ai/invokeai:main-cpu"
+fi
+
 if is_profile_active "qdrant"; then
     log_subheader "Qdrant"
     check_image_update "qdrant" "qdrant/qdrant:latest"

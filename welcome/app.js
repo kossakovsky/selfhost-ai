@@ -316,6 +316,14 @@
             category: 'ai',
             docsUrl: 'https://docs.comfy.org'
         },
+        'invokeai': {
+            name: 'InvokeAI',
+            description: 'Stable Diffusion Studio',
+            icon: 'IA',
+            color: 'bg-[#7C3AED]',
+            category: 'ai',
+            docsUrl: 'https://invoke.ai'
+        },
         'libretranslate': {
             name: 'LibreTranslate',
             description: 'Translation API',

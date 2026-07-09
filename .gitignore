@@ -3,6 +3,7 @@
 .env.bak
 .env.test
 neo4j/
+invokeai/
 searxng/settings.yml
 searxng/uwsgi*
 shared/

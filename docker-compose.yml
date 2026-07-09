@@ -133,6 +133,22 @@ x-init-ollama: &init-ollama
     - "-c"
     - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:7b-instruct-q4_K_M; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
 
+# InvokeAI shared config (hardware variants below, mutually exclusive profiles like Ollama)
+x-invokeai: &service-invokeai
+  container_name: invokeai
+  restart: unless-stopped
+  logging: *default-logging
+  environment: &invokeai-env
+    <<: *proxy-env
+  volumes:
+    - ./invokeai:/invokeai
+  healthcheck:
+    test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:9090/api/v1/app/version', timeout=5)\" || exit 1"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+    start_period: 90s
+
 # Worker-runner anchor for sidecar pattern (runner connects to worker via localhost)
 x-n8n-worker-runner: &service-n8n-worker-runner
   build:
@@ -352,6 +368,9 @@ services:
       DOCLING_USERNAME: ${DOCLING_USERNAME}
       FLOWISE_HOSTNAME: ${FLOWISE_HOSTNAME}
       GRAFANA_HOSTNAME: ${GRAFANA_HOSTNAME}
+      INVOKEAI_HOSTNAME: ${INVOKEAI_HOSTNAME}
+      INVOKEAI_PASSWORD_HASH: ${INVOKEAI_PASSWORD_HASH}
+      INVOKEAI_USERNAME: ${INVOKEAI_USERNAME}
       LANGFUSE_HOSTNAME: ${LANGFUSE_HOSTNAME}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-internal}
       LETTA_HOSTNAME: ${LETTA_HOSTNAME}
@@ -642,6 +661,35 @@ services:
     image: ollama/ollama:rocm
     depends_on:
       - ollama-gpu-amd
+
+  invokeai-nvidia:
+    <<: *service-invokeai
+    image: ghcr.io/invoke-ai/invokeai:latest
+    profiles: ["invokeai-nvidia"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  invokeai-amd:
+    <<: *service-invokeai
+    image: ghcr.io/invoke-ai/invokeai:main-rocm
+    profiles: ["invokeai-amd"]
+    devices:
+      - "/dev/kfd"
+      - "/dev/dri"
+    environment:
+      <<: *invokeai-env
+      AMD_VISIBLE_DEVICES: all
+      RENDER_GROUP_ID: ${RENDER_GROUP_ID:-}
+
+  invokeai-cpu:
+    <<: *service-invokeai
+    image: ghcr.io/invoke-ai/invokeai:main-cpu
+    profiles: ["invokeai-cpu"]
 
   prometheus:
     image: prom/prometheus:latest

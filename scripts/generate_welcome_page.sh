@@ -283,6 +283,20 @@ if is_profile_active "comfyui"; then
     }")
 fi
 
+# InvokeAI
+if is_profile_active "invokeai-nvidia" || is_profile_active "invokeai-amd" || is_profile_active "invokeai-cpu"; then
+    SERVICES_ARRAY+=("    \"invokeai\": {
+      \"hostname\": \"$(json_escape "$INVOKEAI_HOSTNAME")\",
+      \"credentials\": {
+        \"username\": \"$(json_escape "$INVOKEAI_USERNAME")\",
+        \"password\": \"$(json_escape "$INVOKEAI_PASSWORD")\"
+      },
+      \"extra\": {
+        \"internal_api\": \"http://invokeai:9090\"
+      }
+    }")
+fi
+
 # LibreTranslate
 if is_profile_active "libretranslate"; then
     SERVICES_ARRAY+=("    \"libretranslate\": {

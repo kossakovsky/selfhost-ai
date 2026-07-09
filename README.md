@@ -76,6 +76,8 @@ The installer also makes the following powerful open-source tools **available fo
 
 ✅ [**Grafana**](https://grafana.com/) - An open-source platform for visualizing monitoring data, helping you understand system performance at a glance.
 
+✅ [**InvokeAI**](https://invoke.ai/) - A professional creative engine for Stable Diffusion with a polished web UI, node-based workflow editor, inpainting/outpainting, and a REST API. Choose NVIDIA, AMD, or CPU hardware during install; models and outputs are stored in `./invokeai` on the host.
+
 ✅ [**Langfuse**](https://langfuse.com/) - An open-source platform to help you observe and understand how your AI agents are performing, making it easier to debug and improve them.
 
 ✅ [**Letta**](https://docs.letta.com/) - An open-source agent server and SDK that can be connected to various LLM API backends (OpenAI, Anthropic, Ollama, etc.), enabling you to build and manage AI agents.
@@ -190,6 +192,7 @@ After successful installation, your services are up and running! Here's how to g
     - **Docling:** `docling.yourdomain.com` (Universal document converter with REST API; web UI available at `/ui`)
     - **Flowise:** `flowise.yourdomain.com` (Log in with the email address you provided during installation and the initial password from the summary report.)
     - **Grafana:** `grafana.yourdomain.com`
+    - **InvokeAI:** `invokeai.yourdomain.com` (Stable Diffusion studio; download a model via the Model Manager on first visit)
     - **Langfuse:** `langfuse.yourdomain.com`
     - **Letta:** `letta.yourdomain.com`
     - **LibreTranslate:** `translate.yourdomain.com`

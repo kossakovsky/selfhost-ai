@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- **InvokeAI** - Professional Stable Diffusion studio with web UI, workflow editor, and REST API. Selectable NVIDIA/AMD/CPU hardware profiles (`invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`), protected by Caddy basic auth; models and outputs stored in `./invokeai` (#72)
+
 ## [1.6.0] - 2026-07-01
 
 ### Added

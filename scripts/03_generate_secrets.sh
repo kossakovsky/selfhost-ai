@@ -47,6 +47,7 @@ EMAIL_VARS=(
     "COMFYUI_USERNAME"
     "DASHBOARD_USERNAME"
     "DOCLING_USERNAME"
+    "INVOKEAI_USERNAME"
     "LANGFUSE_INIT_USER_EMAIL"
     "LETSENCRYPT_EMAIL"
     "LIGHTRAG_USERNAME"
@@ -85,6 +86,7 @@ declare -A VARS_TO_GENERATE=(
     ["GOST_PASSWORD"]="password:32"
     ["GOST_USERNAME"]="fixed:gost"
     ["GRAFANA_ADMIN_PASSWORD"]="password:32"
+    ["INVOKEAI_PASSWORD"]="password:32" # Added InvokeAI basic auth password
     ["JWT_SECRET"]="base64:64" # 48 bytes -> 64 chars
     ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"]="langfuse_pk:32"
     ["LANGFUSE_INIT_PROJECT_SECRET_KEY"]="langfuse_sk:32"
@@ -572,7 +574,7 @@ if [[ -n "$template_no_proxy" ]]; then
 fi
 
 # Hash passwords using caddy with bcrypt (consolidated loop)
-SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME")
+SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME" "INVOKEAI")
 
 for service in "${SERVICES_NEEDING_HASH[@]}"; do
     password_var="${service}_PASSWORD"
