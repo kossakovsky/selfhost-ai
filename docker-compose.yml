@@ -783,7 +783,7 @@ services:
     healthcheck:
       # Second probe checks the dashboard accepts connections (401 still passes,
       # connection refused fails) - the two components can die independently
-      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -fsS http://localhost:8642/health && curl -s -o /dev/null http://localhost:9119/ || exit 1"]
+      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -fsS http://localhost:8642/health && http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -s -o /dev/null http://localhost:9119/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
