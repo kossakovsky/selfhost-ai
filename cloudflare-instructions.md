@@ -117,6 +117,9 @@ After DNS is configured, go to **Cloudflare One Dashboard** → **Networks** →
 | **Docling**        | docling.yourdomain.com        | `http://docling:5001`        | ⚠️ Loses Caddy auth  |
 | **Flowise**        | flowise.yourdomain.com        | `http://flowise:3001`        | Built-in login      |
 | **Grafana**        | grafana.yourdomain.com        | `http://grafana:3000`        | Built-in login      |
+| **Hermes Agent**   | hermes.yourdomain.com         | `http://hermes:9119`         | Built-in login      |
+| **Hermes API**     | hermes-api.yourdomain.com     | `http://hermes:8642`         | Bearer token        |
+| **InvokeAI**       | invokeai.yourdomain.com       | `http://invokeai:9090`       | ⚠️ Loses Caddy auth  |
 | **Langfuse**       | langfuse.yourdomain.com       | `http://langfuse-web:3000`   | Built-in login      |
 | **Letta**          | letta.yourdomain.com          | `http://letta:8283`          | No auth             |
 | **LibreTranslate** | libretranslate.yourdomain.com | `http://libretranslate:5000` | ⚠️ Loses Caddy auth  |
@@ -409,6 +412,14 @@ curl -sI https://yourdomain.com 2>/dev/null | grep -q "cf-ray" && echo "✓ Traf
 **"ERR Cannot determine default origin certificate path":**
 - This warning in logs is normal for token-based tunnels
 - Does not affect functionality — tunnel still works
+
+**Tunnel unstable or failing to connect (QUIC/UDP blocked):**
+- Some ISPs and firewalls block UDP traffic, which the QUIC protocol requires
+- **Solution**: Set `CLOUDFLARE_TUNNEL_PROTOCOL=http2` in `.env` (uses TCP instead) and recreate the tunnel:
+  ```bash
+  docker compose -p localai up -d --force-recreate cloudflared
+  ```
+- Valid values: `auto` (default, prefers QUIC and falls back to HTTP/2 at startup), `quic`, `http2`
 
 **Mixed mode (tunnel + direct access):**
 - You can run both tunnel and traditional Caddy access simultaneously

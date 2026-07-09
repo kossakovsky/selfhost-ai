@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-07-09
+
+### Added
+- **InvokeAI** - Professional Stable Diffusion studio with web UI, workflow editor, and REST API. Selectable NVIDIA/AMD/CPU hardware profiles (`invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`), protected by Caddy basic auth; models and outputs stored in `./invokeai` (#72)
+- **Hermes Agent** - Autonomous AI agent platform by Nous Research (skills, persistent memory, MCP, multi-agent workflows) as an optional `hermes` profile. Web dashboard at `HERMES_HOSTNAME` (protected by Hermes's built-in basic auth with generated credentials) and OpenAI-compatible API at `HERMES_API_HOSTNAME` / `http://hermes:8642/v1` (Bearer `HERMES_API_SERVER_KEY`), so n8n workflows can call it like any OpenAI endpoint. Persistent data lives in `./hermes` (gitignored) for direct editing of `.env`, `config.yaml`, skills, and memories; configure an LLM provider via `docker compose -p localai run --rm hermes setup` (#71).
+- **Cloudflare Tunnel** - Configurable transport protocol via `CLOUDFLARE_TUNNEL_PROTOCOL` in `.env`: `auto` (default, prefers QUIC with HTTP/2 fallback), `quic`, or `http2`. Set `http2` if your ISP or firewall blocks UDP and the tunnel is unstable (#69).
+
+### Changed
+- **Docker Compose** - Wrap all `${VARIABLE}` interpolations in double quotes to guard against YAML parsing issues with special characters in inline default values and keep the quoting style consistent across the file. No functional change: the rendered `docker compose config` output is identical (#70).
+
+### Fixed
+- **Installer** - Fail fast with a clear error when bcrypt hash generation fails during secret generation (affects all services behind Caddy basic auth). Previously an empty hash was written silently, which either broke Caddy config parsing on startup (taking down every service) or left the service behind a deny-all basic auth with no error surfaced.
+- **Hermes Agent** - Add the missing `make update-preview` entry and Cloudflare Tunnel routing rows for the Hermes hostnames; `make doctor` now reports an error when the `hermes` profile is active but `HERMES_API_SERVER_KEY` is empty (the API server refuses to start without it, leaving the container half-dead).
+
 ## [1.6.0] - 2026-07-01
 
 ### Added

@@ -231,12 +231,13 @@ Common profiles:
 - `monitoring`: Prometheus, Grafana, cAdvisor, node-exporter
 - `langfuse`: Langfuse observability (includes ClickHouse, MinIO, worker, web)
 - `cpu`, `gpu-nvidia`, `gpu-amd`: Ollama hardware profiles (mutually exclusive)
+- `invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`: InvokeAI hardware profiles (mutually exclusive)
 - `cloudflare-tunnel`: Cloudflare Tunnel for zero-trust access (see `cloudflare-instructions.md`)
 - `supabase`: Supabase BaaS (external compose, cloned at runtime; mutually exclusive with `dify`)
 - `dify`: Dify AI platform (external compose, cloned at runtime; mutually exclusive with `supabase`)
 - `gost`: HTTP/HTTPS proxy for routing AI service outbound traffic
 - `python-runner`: Internal Python execution environment (no external access)
-- `searxng`, `letta`, `lightrag`, `libretranslate`, `crawl4ai`, `docling`, `waha`, `comfyui`, `paddleocr`, `ragapp`, `gotenberg`, `postiz`: Additional optional services
+- `searxng`, `letta`, `hermes`, `lightrag`, `libretranslate`, `crawl4ai`, `docling`, `waha`, `comfyui`, `paddleocr`, `ragapp`, `gotenberg`, `postiz`: Additional optional services
 
 ## Architecture Patterns
 
@@ -278,6 +279,7 @@ depends_on:
 - All hostnames end with `_HOSTNAME`
 - Password hashes end with `_PASSWORD_HASH`
 - Use `${VAR:-default}` for optional vars with defaults
+- Always wrap `${VAR}` interpolations in `docker-compose.yml` in double quotes: `"${VAR:-default}"`
 
 ### Profile Activation Logic
 
@@ -293,9 +295,9 @@ fi
 Services making outbound HTTP requests to AI APIs (OpenAI, Anthropic, etc.) should use the shared proxy anchor:
 ```yaml
 x-proxy-env: &proxy-env
-  HTTP_PROXY: ${GOST_PROXY_URL:-}
-  HTTPS_PROXY: ${GOST_PROXY_URL:-}
-  NO_PROXY: ${GOST_NO_PROXY:-}
+  HTTP_PROXY: "${GOST_PROXY_URL:-}"
+  HTTPS_PROXY: "${GOST_PROXY_URL:-}"
+  NO_PROXY: "${GOST_NO_PROXY:-}"
 
 services:
   myservice:

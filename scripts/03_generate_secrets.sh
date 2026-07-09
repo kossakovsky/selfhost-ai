@@ -47,6 +47,8 @@ EMAIL_VARS=(
     "COMFYUI_USERNAME"
     "DASHBOARD_USERNAME"
     "DOCLING_USERNAME"
+    "HERMES_USERNAME"
+    "INVOKEAI_USERNAME"
     "LANGFUSE_INIT_USER_EMAIL"
     "LETSENCRYPT_EMAIL"
     "LIGHTRAG_USERNAME"
@@ -85,6 +87,10 @@ declare -A VARS_TO_GENERATE=(
     ["GOST_PASSWORD"]="password:32"
     ["GOST_USERNAME"]="fixed:gost"
     ["GRAFANA_ADMIN_PASSWORD"]="password:32"
+    ["HERMES_API_SERVER_KEY"]="secret:48" # Bearer token for Hermes OpenAI-compatible API
+    ["HERMES_DASHBOARD_SECRET"]="secret:64" # Session secret for Hermes dashboard basic auth
+    ["HERMES_PASSWORD"]="password:32" # Hermes dashboard basic auth password
+    ["INVOKEAI_PASSWORD"]="password:32" # InvokeAI Caddy basic auth password
     ["JWT_SECRET"]="base64:64" # 48 bytes -> 64 chars
     ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"]="langfuse_pk:32"
     ["LANGFUSE_INIT_PROJECT_SECRET_KEY"]="langfuse_sk:32"
@@ -572,7 +578,7 @@ if [[ -n "$template_no_proxy" ]]; then
 fi
 
 # Hash passwords using caddy with bcrypt (consolidated loop)
-SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME")
+SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME" "INVOKEAI")
 
 for service in "${SERVICES_NEEDING_HASH[@]}"; do
     password_var="${service}_PASSWORD"
@@ -587,6 +593,11 @@ for service in "${SERVICES_NEEDING_HASH[@]}"; do
         if [[ -n "$new_hash" ]]; then
             existing_hash="$new_hash"
             generated_values["$hash_var"]="$new_hash"
+        else
+            # An empty hash would either break Caddy config parsing (username
+            # without hash) or silently lock the service behind a deny-all
+            log_error "Failed to generate bcrypt hash for ${service} - Caddy basic auth would be broken."
+            exit 1
         fi
     fi
 

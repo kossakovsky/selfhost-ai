@@ -308,6 +308,14 @@
             category: 'ai',
             docsUrl: 'https://docs.letta.com'
         },
+        'hermes': {
+            name: 'Hermes Agent',
+            description: 'Autonomous AI agent with skills, memory & MCP',
+            icon: 'HA',
+            color: 'bg-amber-500',
+            category: 'ai',
+            docsUrl: 'https://github.com/NousResearch/hermes-agent'
+        },
         'comfyui': {
             name: 'ComfyUI',
             description: 'Stable Diffusion UI',
@@ -315,6 +323,14 @@
             color: 'bg-[#172DD7]',
             category: 'ai',
             docsUrl: 'https://docs.comfy.org'
+        },
+        'invokeai': {
+            name: 'InvokeAI',
+            description: 'Stable Diffusion Studio',
+            icon: 'IA',
+            color: 'bg-[#7C3AED]',
+            category: 'ai',
+            docsUrl: 'https://invoke.ai'
         },
         'libretranslate': {
             name: 'LibreTranslate',

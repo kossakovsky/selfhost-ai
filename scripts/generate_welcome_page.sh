@@ -272,6 +272,23 @@ if is_profile_active "letta"; then
     }")
 fi
 
+# Hermes Agent
+if is_profile_active "hermes"; then
+    SERVICES_ARRAY+=("    \"hermes\": {
+      \"hostname\": \"$(json_escape "$HERMES_HOSTNAME")\",
+      \"credentials\": {
+        \"username\": \"$(json_escape "$HERMES_USERNAME")\",
+        \"password\": \"$(json_escape "$HERMES_PASSWORD")\",
+        \"api_key\": \"$(json_escape "$HERMES_API_SERVER_KEY")\"
+      },
+      \"extra\": {
+        \"internal_api\": \"http://hermes:8642/v1\",
+        \"api_endpoint\": \"https://$(json_escape "$HERMES_API_HOSTNAME")/v1\",
+        \"docs\": \"https://github.com/NousResearch/hermes-agent\"
+      }
+    }")
+fi
+
 # ComfyUI
 if is_profile_active "comfyui"; then
     SERVICES_ARRAY+=("    \"comfyui\": {
@@ -279,6 +296,20 @@ if is_profile_active "comfyui"; then
       \"credentials\": {
         \"username\": \"$(json_escape "$COMFYUI_USERNAME")\",
         \"password\": \"$(json_escape "$COMFYUI_PASSWORD")\"
+      }
+    }")
+fi
+
+# InvokeAI
+if is_profile_active "invokeai-nvidia" || is_profile_active "invokeai-amd" || is_profile_active "invokeai-cpu"; then
+    SERVICES_ARRAY+=("    \"invokeai\": {
+      \"hostname\": \"$(json_escape "$INVOKEAI_HOSTNAME")\",
+      \"credentials\": {
+        \"username\": \"$(json_escape "$INVOKEAI_USERNAME")\",
+        \"password\": \"$(json_escape "$INVOKEAI_PASSWORD")\"
+      },
+      \"extra\": {
+        \"internal_api\": \"http://invokeai:9090\"
       }
     }")
 fi
@@ -539,6 +570,16 @@ if is_profile_active "databasus"; then
       \"step\": $STEP_NUM,
       \"title\": \"Configure database backups\",
       \"description\": \"Set up Databasus for automated database backups\"
+    }")
+    ((STEP_NUM++))
+fi
+
+# Configure Hermes Agent (if hermes active)
+if is_profile_active "hermes"; then
+    QUICK_START_ARRAY+=("    {
+      \"step\": $STEP_NUM,
+      \"title\": \"Configure Hermes Agent\",
+      \"description\": \"Set an LLM provider key: 'docker compose -p localai run --rm hermes setup' (or edit ./hermes/.env)\"
     }")
     ((STEP_NUM++))
 fi

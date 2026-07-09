@@ -106,11 +106,17 @@ fi
 if is_profile_active "uptime-kuma"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Uptime Kuma${NC}: Create your account on first login"
 fi
+if is_profile_active "hermes"; then
+    echo -e "     ${GREEN}*${NC} ${WHITE}Hermes Agent${NC}: Set an LLM provider key first: 'docker compose -p localai run --rm hermes setup' (or edit ./hermes/.env)"
+fi
 if is_profile_active "gost"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Gost Proxy${NC}: Routing AI traffic through external proxy"
 fi
 if is_profile_active "cpu" || is_profile_active "gpu-nvidia" || is_profile_active "gpu-amd"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Ollama API${NC}: To expose externally, point DNS at ${OLLAMA_HOSTNAME:-<OLLAMA_HOSTNAME>} and send 'Authorization: Bearer <token>' (see Welcome Page)"
+fi
+if is_profile_active "invokeai-nvidia" || is_profile_active "invokeai-amd" || is_profile_active "invokeai-cpu"; then
+    echo -e "     ${GREEN}*${NC} ${WHITE}InvokeAI${NC}: Open the Model Manager on first visit and download a starter model before generating images"
 fi
 echo ""
 echo -e "  ${WHITE}4.${NC} Run ${CYAN}make doctor${NC} if you experience any issues"

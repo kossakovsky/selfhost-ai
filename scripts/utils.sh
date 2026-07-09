@@ -509,7 +509,7 @@ gen_base64() {
 generate_bcrypt_hash() {
     local plaintext="$1"
     if [[ -n "$plaintext" ]]; then
-        caddy hash-password --algorithm bcrypt --plaintext "$plaintext" 2>/dev/null
+        caddy hash-password --algorithm bcrypt --plaintext "$plaintext"
     fi
 }
 
