@@ -80,6 +80,9 @@ fi
 # Change to project root for git operations
 cd "$PROJECT_ROOT" || { log_error "Failed to change directory to $PROJECT_ROOT"; exit 1; }
 
+# Repoint remotes still targeting the pre-rename repository URL
+git_heal_renamed_remotes
+
 # Backup user-customizable directories before git reset (uses PRESERVE_DIRS from utils.sh)
 if ! BACKUP_PATH=$(backup_preserved_dirs); then
     log_error "Backup failed. Aborting update to prevent data loss."

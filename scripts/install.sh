@@ -26,22 +26,19 @@ source "$(dirname "$0")/utils.sh"
 current_path=$(pwd)
 for _repo_dir in "selfhost-ai" "n8n-install"; do
     if [[ "$current_path" == *"/${_repo_dir}/${_repo_dir}" ]]; then
-        log_info "Detected nested ${_repo_dir} directory. Correcting..."
-        cd ..
-        log_info "Moved to $(pwd)"
-        log_info "Removing redundant ${_repo_dir} directory..."
-        rm -rf "${_repo_dir}"
-        log_info "Redundant directory removed."
-        # Re-evaluate SCRIPT_DIR after potential path correction
-        SCRIPT_DIR_REALPATH_TEMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-        if [[ "$SCRIPT_DIR_REALPATH_TEMP" == *"/${_repo_dir}/${_repo_dir}/scripts" ]]; then
-            # If SCRIPT_DIR is still pointing to the nested structure's scripts dir, adjust it
-            # This happens if the script was invoked like: sudo bash selfhost-ai/scripts/install.sh
-            # from the outer project directory.
-            # We need to ensure that relative paths for other scripts are correct.
-            # The most robust way is to re-execute the script from the corrected location
-            # if the SCRIPT_DIR itself was nested.
-            log_info "Re-executing install script from corrected path..."
+        # Only treat this as an accidental nested clone if the parent
+        # directory is itself a copy of this repository. A same-named plain
+        # folder holding a fresh clone (e.g. ~/selfhost-ai/selfhost-ai) is a
+        # normal layout: install from the current clone, delete nothing.
+        if [[ -f "../scripts/install.sh" && -f "../docker-compose.yml" ]]; then
+            log_info "Detected nested ${_repo_dir} clone inside another copy of the repository. Correcting..."
+            cd ..
+            log_info "Removing redundant nested ${_repo_dir} directory..."
+            rm -rf "${_repo_dir}"
+            # The deleted clone may be where this script was loaded from, so
+            # relative paths can no longer be trusted: restart the installer
+            # from the surviving outer copy.
+            log_info "Re-executing installer from $(pwd)..."
             exec sudo bash "./scripts/install.sh" "$@"
         fi
         break

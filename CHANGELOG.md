@@ -5,7 +5,10 @@
 ## [1.7.1] - 2026-07-09
 
 ### Changed
-- **Project renamed to Selfhost AI** - The repository moved from `kossakovsky/n8n-install` to [`kossakovsky/selfhost-ai`](https://github.com/kossakovsky/selfhost-ai) to reflect that the stack has grown well beyond n8n. GitHub redirects all old links and git remotes automatically, so existing installations keep working without changes; optionally update your remote with `git remote set-url origin https://github.com/kossakovsky/selfhost-ai`. The installer handles clones under both directory names.
+- **Project renamed to Selfhost AI** - The repository moved from `kossakovsky/n8n-install` to [`kossakovsky/selfhost-ai`](https://github.com/kossakovsky/selfhost-ai) to reflect that the stack has grown well beyond n8n. GitHub redirects all old links and git remotes automatically, so existing installations keep working without changes. On the next `make update`, remotes still pointing at the old URL are repointed to the new one automatically (protocol preserved; fork remotes are never touched - only remotes targeting the canonical `kossakovsky/n8n-install` are rewritten). The installer handles clones under both directory names.
+
+### Fixed
+- **Installer** - The nested-clone cleanup in `install.sh` now verifies that the parent directory is actually a copy of this repository before removing anything. Previously, cloning into a same-named plain folder (e.g. `~/selfhost-ai/selfhost-ai`) made the installer delete the fresh clone (including `.env` with generated secrets on re-runs) and exit silently. The unreachable re-exec probe was replaced with an unconditional restart from the surviving outer copy.
 
 ## [1.7.0] - 2026-07-09
 

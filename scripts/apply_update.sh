@@ -21,6 +21,9 @@ set -e
 source "$(dirname "$0")/utils.sh"
 init_paths
 
+# Source git utilities
+source "$SCRIPT_DIR/git.sh"
+
 # Source telemetry functions
 source "$SCRIPT_DIR/telemetry.sh"
 
@@ -37,6 +40,12 @@ RUN_SERVICES_SCRIPT="$SCRIPT_DIR/06_run_services.sh"
 require_file "$RUN_SERVICES_SCRIPT" "$RUN_SERVICES_SCRIPT not found."
 
 cd "$PROJECT_ROOT"
+
+# Repoint remotes still targeting the pre-rename repository URL. Also
+# called here (not only in update.sh) so installations updating FROM an
+# old version get healed in the same run: the old update.sh has already
+# fetched the new code via GitHub's redirect by the time this executes.
+git_heal_renamed_remotes
 
 # Send telemetry: update started
 send_telemetry "update_start"

@@ -1,4 +1,4 @@
-# Self-Hosted AI Automation Platform
+# Selfhost AI — Self-Hosted AI Automation Platform
 
 [![GitHub stars](https://img.shields.io/github/stars/kossakovsky/selfhost-ai?style=social)](https://github.com/kossakovsky/selfhost-ai/stargazers)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
