@@ -27,14 +27,18 @@ current_path=$(pwd)
 for _repo_dir in "selfhost-ai" "n8n-install" "n8n-installer"; do
     if [[ "$current_path" == *"/${_repo_dir}/${_repo_dir}" ]]; then
         # Only treat this as an accidental nested clone if the parent
-        # directory is itself a copy of this repository. A same-named plain
-        # folder holding a fresh clone (e.g. ~/selfhost-ai/selfhost-ai) is a
-        # normal layout: install from the current clone, delete nothing.
-        if [[ -f "../scripts/install.sh" && -f "../docker-compose.yml" ]]; then
+        # directory is itself a copy of this repository - the third marker
+        # is unique to this project, so a foreign compose stack that happens
+        # to ship scripts/install.sh is not mistaken for one. A same-named
+        # plain folder holding a fresh clone (e.g. ~/selfhost-ai/selfhost-ai)
+        # is a normal layout: install from the current clone, delete nothing.
+        if [[ -f "../scripts/install.sh" && -f "../docker-compose.yml" && -f "../scripts/generate_n8n_workers.sh" ]]; then
             log_info "Detected nested ${_repo_dir} clone inside another copy of the repository. Correcting..."
-            cd ..
-            log_info "Removing redundant nested ${_repo_dir} directory..."
-            rm -rf "${_repo_dir}"
+            # The outer copy wins and may be older than the clone being
+            # removed - surface both versions so a downgrade is visible
+            log_info "Keeping outer copy (version $(cat ../VERSION 2>/dev/null || echo 'unknown')), removing nested clone (version $(cat VERSION 2>/dev/null || echo 'unknown'))."
+            cd .. || { log_error "Failed to enter the outer directory. Aborting."; exit 1; }
+            rm -rf "${_repo_dir}" || { log_error "Failed to remove the nested ${_repo_dir} directory. Remove it manually and re-run the installer."; exit 1; }
             # The deleted clone may be where this script was loaded from, so
             # relative paths can no longer be trusted: restart the installer
             # from the surviving outer copy.

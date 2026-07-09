@@ -149,25 +149,43 @@ git_merge_from_upstream() {
 git_heal_renamed_remotes() {
     local old_slugs=("kossakovsky/n8n-install" "kossakovsky/n8n-installer")
     local new_slug="kossakovsky/selfhost-ai"
-    local remote url new_url old_slug
+    local remote url stripped check tail prefix new_url old_slug healed
 
     for remote in $(git remote 2>/dev/null); do
         url=$(git remote get-url "$remote" 2>/dev/null) || continue
+        # GitHub tolerates a trailing slash and treats slugs
+        # case-insensitively, so normalize a comparison copy while keeping
+        # the original URL (protocol, credentials, case) for the rewrite
+        stripped="${url%/}"
+        check=$(printf '%s' "$stripped" | tr '[:upper:]' '[:lower:]')
+        healed=""
         for old_slug in "${old_slugs[@]}"; do
-            case "$url" in
-                *"github.com/${old_slug}" | *"github.com/${old_slug}.git" | \
-                *"github.com:${old_slug}" | *"github.com:${old_slug}.git")
-                    new_url="${url/${old_slug}/${new_slug}}"
-                    log_info "Remote '$remote' still points at the renamed repository. Updating URL: $url -> $new_url"
-                    if git remote set-url "$remote" "$new_url"; then
-                        log_success "Remote '$remote' now points at $new_url"
-                    else
-                        log_warning "Could not update remote '$remote'. GitHub redirects keep the old URL working for now."
-                    fi
-                    break
+            case "$check" in
+                *"github.com/${old_slug}.git" | *"github.com:${old_slug}.git") tail="${old_slug}.git" ;;
+                *"github.com/${old_slug}" | *"github.com:${old_slug}")         tail="${old_slug}" ;;
+                *) continue ;;
+            esac
+            prefix="${stripped:0:$(( ${#stripped} - ${#tail} ))}"
+            new_url="${prefix}${new_slug}"
+            [[ "$tail" == *.git ]] && new_url="${new_url}.git"
+            log_info "Remote '$remote' still points at the renamed repository. Updating URL: $url -> $new_url"
+            if git remote set-url "$remote" "$new_url"; then
+                log_success "Remote '$remote' now points at $new_url"
+            else
+                log_warning "Could not update remote '$remote'. GitHub redirects keep the old URL working for now."
+            fi
+            healed=1
+            break
+        done
+        # Leave unrecognized forms alone, but say so: they keep relying on
+        # GitHub's redirect, which dies if the old name is ever re-registered
+        if [[ -z "$healed" ]]; then
+            case "$check" in
+                *github.com*kossakovsky/n8n-install*)
+                    log_warning "Remote '$remote' seems to reference the project's old name in a form the updater does not rewrite: $url. Consider running: git remote set-url $remote https://github.com/${new_slug}"
                     ;;
             esac
-        done
+        fi
     done
     return 0
 }
