@@ -190,6 +190,15 @@ import /etc/caddy/addons/tls-snippet.conf
     reverse_proxy comfyui:8188
 }
 
+# InvokeAI
+{$INVOKEAI_HOSTNAME} {
+    import service_tls
+    basic_auth {
+        {$INVOKEAI_USERNAME} {$INVOKEAI_PASSWORD_HASH}
+    }
+    reverse_proxy invokeai:9090
+}
+
 # LibreTranslate (Self-hosted Translation API)
 {$LT_HOSTNAME} {
     import service_tls

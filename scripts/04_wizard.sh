@@ -49,6 +49,7 @@ base_services_data=(
     "gost" "Gost Proxy (HTTP/HTTPS proxy for AI services outbound traffic)"
     "gotenberg" "Gotenberg (Document Conversion API)"
     "hermes" "Hermes Agent (Autonomous AI agent: skills, memory, MCP)"
+    "invokeai" "InvokeAI (Stable Diffusion Studio - select hardware in next step)"
     "langfuse" "Langfuse Suite (AI Observability - includes Clickhouse, Minio)"
     "letta" "Letta (Agent Server & SDK)"
     "libretranslate" "LibreTranslate (Self-hosted translation API - 50+ languages)"
@@ -89,6 +90,12 @@ while [ $idx -lt ${#base_services_data[@]} ]; do
                   "$current_profiles_for_matching" == *",gpu-amd,"* ]]; then
                 status="ON"
             fi
+        elif [[ "$tag" == "invokeai" ]]; then
+            if [[ "$current_profiles_for_matching" == *",invokeai-nvidia,"* || \
+                  "$current_profiles_for_matching" == *",invokeai-amd,"* || \
+                  "$current_profiles_for_matching" == *",invokeai-cpu,"* ]]; then
+                status="ON"
+            fi
         elif [[ "$current_profiles_for_matching" == *",$tag,"* ]]; then
             status="ON"
         fi
@@ -125,6 +132,7 @@ fi
 selected_profiles=()
 ollama_selected=0
 ollama_profile=""
+invokeai_selected=0
 
 if [ -n "$CHOICES" ]; then
     # Parse whiptail output safely (without eval)
@@ -134,6 +142,8 @@ if [ -n "$CHOICES" ]; then
     for choice in "${temp_choices[@]}"; do
         if [ "$choice" == "ollama" ]; then
             ollama_selected=1
+        elif [ "$choice" == "invokeai" ]; then
+            invokeai_selected=1
         else
             selected_profiles+=("$choice")
         fi
@@ -207,6 +217,65 @@ if [ $ollama_selected -eq 1 ]; then
     fi
 fi
 
+# If InvokeAI was selected, prompt for the hardware profile
+if [ $invokeai_selected -eq 1 ]; then
+    # Determine default selected InvokeAI hardware profile from .env
+    default_invokeai_hardware="invokeai-nvidia" # Fallback default
+    invokeai_hw_on_nvidia="OFF"
+    invokeai_hw_on_amd="OFF"
+    invokeai_hw_on_cpu="OFF"
+
+    # Check current_profiles_for_matching which includes commas, e.g., ",invokeai-nvidia,"
+    if [[ "$current_profiles_for_matching" == *",invokeai-nvidia,"* ]]; then
+        invokeai_hw_on_nvidia="ON"
+        default_invokeai_hardware="invokeai-nvidia"
+    elif [[ "$current_profiles_for_matching" == *",invokeai-amd,"* ]]; then
+        invokeai_hw_on_amd="ON"
+        default_invokeai_hardware="invokeai-amd"
+    elif [[ "$current_profiles_for_matching" == *",invokeai-cpu,"* ]]; then
+        invokeai_hw_on_cpu="ON"
+        default_invokeai_hardware="invokeai-cpu"
+    else
+        # If invokeai was selected in the main list, but no specific hardware profile was previously set,
+        # default to NVIDIA ON for the radiolist (image generation on CPU is very slow).
+        invokeai_hw_on_nvidia="ON"
+        default_invokeai_hardware="invokeai-nvidia"
+    fi
+
+    invokeai_hardware_options=(
+        "invokeai-nvidia" "NVIDIA GPU (Requires NVIDIA drivers & CUDA)" "$invokeai_hw_on_nvidia"
+        "invokeai-amd" "AMD GPU (Requires ROCm drivers; set RENDER_GROUP_ID in .env)" "$invokeai_hw_on_amd"
+        "invokeai-cpu" "CPU (Very slow image generation, not recommended)" "$invokeai_hw_on_cpu"
+    )
+    CHOSEN_INVOKEAI_PROFILE=$(wt_radiolist "InvokeAI Hardware Profile" \
+      "Choose the hardware profile for InvokeAI. This will be added to your Docker Compose profiles." \
+      "$default_invokeai_hardware" \
+      "${invokeai_hardware_options[@]}")
+
+    invokeai_exitstatus=$?
+    if [ $invokeai_exitstatus -eq 0 ] && [ -n "$CHOSEN_INVOKEAI_PROFILE" ]; then
+        selected_profiles+=("$CHOSEN_INVOKEAI_PROFILE")
+        log_info "InvokeAI hardware profile selected: $CHOSEN_INVOKEAI_PROFILE"
+
+        # AMD GPU access requires the container render group to match the host's (see .env.example)
+        if [ "$CHOSEN_INVOKEAI_PROFILE" = "invokeai-amd" ]; then
+            EXISTING_RENDER_GROUP_ID=$(read_env_var "RENDER_GROUP_ID")
+            if [ -z "$EXISTING_RENDER_GROUP_ID" ]; then
+                DETECTED_RENDER_GROUP_ID=$(getent group render | cut -d: -f3)
+                if [ -n "$DETECTED_RENDER_GROUP_ID" ]; then
+                    write_env_var "RENDER_GROUP_ID" "$DETECTED_RENDER_GROUP_ID"
+                    log_info "RENDER_GROUP_ID auto-detected and saved to .env: $DETECTED_RENDER_GROUP_ID"
+                else
+                    log_warning "No 'render' group found on this host. InvokeAI will NOT have GPU access until RENDER_GROUP_ID is set in .env. Are ROCm drivers installed?"
+                fi
+            fi
+        fi
+    else
+        log_warning "InvokeAI hardware profile selection cancelled. InvokeAI will not be installed."
+        invokeai_selected=0 # Mark as not fully selected if profile choice is cancelled
+    fi
+fi
+
 # If Gost was selected, prompt for upstream proxy URL
 gost_selected=0
 for p in "${selected_profiles[@]}"; do
@@ -260,6 +329,8 @@ else
             else
                  echo -e "  ${GREEN}*${NC} $profile"
             fi
+        elif [[ "$profile" == "invokeai-nvidia" || "$profile" == "invokeai-amd" || "$profile" == "invokeai-cpu" ]]; then
+            echo -e "  ${GREEN}*${NC} InvokeAI ($profile profile)"
         else
             echo -e "  ${GREEN}*${NC} $profile"
         fi

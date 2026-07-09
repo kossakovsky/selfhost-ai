@@ -231,6 +231,7 @@ Common profiles:
 - `monitoring`: Prometheus, Grafana, cAdvisor, node-exporter
 - `langfuse`: Langfuse observability (includes ClickHouse, MinIO, worker, web)
 - `cpu`, `gpu-nvidia`, `gpu-amd`: Ollama hardware profiles (mutually exclusive)
+- `invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`: InvokeAI hardware profiles (mutually exclusive)
 - `cloudflare-tunnel`: Cloudflare Tunnel for zero-trust access (see `cloudflare-instructions.md`)
 - `supabase`: Supabase BaaS (external compose, cloned at runtime; mutually exclusive with `dify`)
 - `dify`: Dify AI platform (external compose, cloned at runtime; mutually exclusive with `supabase`)
