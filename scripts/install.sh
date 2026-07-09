@@ -21,10 +21,10 @@ set -e
 # Source the utilities file
 source "$(dirname "$0")/utils.sh"
 
-# Check for nested project directory (the repo can be cloned as either
-# selfhost-ai or, via the pre-rename URL, n8n-install)
+# Check for nested project directory (the repo can be cloned as
+# selfhost-ai or, via the pre-rename URLs, n8n-install / n8n-installer)
 current_path=$(pwd)
-for _repo_dir in "selfhost-ai" "n8n-install"; do
+for _repo_dir in "selfhost-ai" "n8n-install" "n8n-installer"; do
     if [[ "$current_path" == *"/${_repo_dir}/${_repo_dir}" ]]; then
         # Only treat this as an accidental nested clone if the parent
         # directory is itself a copy of this repository. A same-named plain
