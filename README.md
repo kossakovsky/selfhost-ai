@@ -76,6 +76,8 @@ The installer also makes the following powerful open-source tools **available fo
 
 ✅ [**Grafana**](https://grafana.com/) - An open-source platform for visualizing monitoring data, helping you understand system performance at a glance.
 
+✅ [**Hermes Agent**](https://github.com/NousResearch/hermes-agent) - An open-source autonomous AI agent by Nous Research with skills, persistent memory, MCP support, and multi-agent workflows. Includes a web dashboard and an OpenAI-compatible API that n8n workflows can call directly.
+
 ✅ [**Langfuse**](https://langfuse.com/) - An open-source platform to help you observe and understand how your AI agents are performing, making it easier to debug and improve them.
 
 ✅ [**Letta**](https://docs.letta.com/) - An open-source agent server and SDK that can be connected to various LLM API backends (OpenAI, Anthropic, Ollama, etc.), enabling you to build and manage AI agents.
@@ -190,6 +192,7 @@ After successful installation, your services are up and running! Here's how to g
     - **Docling:** `docling.yourdomain.com` (Universal document converter with REST API; web UI available at `/ui`)
     - **Flowise:** `flowise.yourdomain.com` (Log in with the email address you provided during installation and the initial password from the summary report.)
     - **Grafana:** `grafana.yourdomain.com`
+    - **Hermes Agent:** `hermes.yourdomain.com` (Dashboard; log in with the email you provided during installation and the password from the Welcome Page. Requires an LLM provider key: run `docker compose -p localai run --rm hermes setup`. OpenAI-compatible API at `hermes-api.yourdomain.com/v1` with `Authorization: Bearer <HERMES_API_SERVER_KEY>`; internally at `http://hermes:8642/v1`. To let the agent manage Docker containers, mount `/var/run/docker.sock` into the `hermes` service via `docker-compose.override.yml` — off by default because it grants root-equivalent host access.)
     - **Langfuse:** `langfuse.yourdomain.com`
     - **Letta:** `letta.yourdomain.com`
     - **LibreTranslate:** `translate.yourdomain.com`
