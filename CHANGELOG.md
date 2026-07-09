@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-07-09
+
 ### Added
 - **InvokeAI** - Professional Stable Diffusion studio with web UI, workflow editor, and REST API. Selectable NVIDIA/AMD/CPU hardware profiles (`invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`), protected by Caddy basic auth; models and outputs stored in `./invokeai` (#72)
 - **Hermes Agent** - Autonomous AI agent platform by Nous Research (skills, persistent memory, MCP, multi-agent workflows) as an optional `hermes` profile. Web dashboard at `HERMES_HOSTNAME` (protected by Hermes's built-in basic auth with generated credentials) and OpenAI-compatible API at `HERMES_API_HOSTNAME` / `http://hermes:8642/v1` (Bearer `HERMES_API_SERVER_KEY`), so n8n workflows can call it like any OpenAI endpoint. Persistent data lives in `./hermes` (gitignored) for direct editing of `.env`, `config.yaml`, skills, and memories; configure an LLM provider via `docker compose -p localai run --rm hermes setup` (#71).
