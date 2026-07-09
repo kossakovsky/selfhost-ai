@@ -125,7 +125,7 @@ echo -e "  ${WHITE}4.${NC} Run ${CYAN}make doctor${NC} if you experience any iss
 echo ""
 print_line
 echo ""
-echo -e "  ${BRIGHT_GREEN}Thank you for using n8n-install!${NC}"
+echo -e "  ${BRIGHT_GREEN}Thank you for using Selfhost AI!${NC}"
 echo ""
 print_line
 echo ""

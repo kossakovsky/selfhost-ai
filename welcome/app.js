@@ -1,5 +1,5 @@
 /**
- * n8n-install Welcome Page
+ * Selfhost AI Welcome Page
  * Dynamic rendering of services and credentials from data.json
  */
 

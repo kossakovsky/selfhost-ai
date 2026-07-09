@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# install.sh - Main installation orchestrator for n8n-install
+# install.sh - Main installation orchestrator for Selfhost AI
 # =============================================================================
 # This script runs the complete installation process by sequentially executing
 # 8 installation steps:
@@ -21,28 +21,32 @@ set -e
 # Source the utilities file
 source "$(dirname "$0")/utils.sh"
 
-# Check for nested n8n-install directory
+# Check for nested project directory (the repo can be cloned as either
+# selfhost-ai or, via the pre-rename URL, n8n-install)
 current_path=$(pwd)
-if [[ "$current_path" == *"/n8n-install/n8n-install" ]]; then
-    log_info "Detected nested n8n-install directory. Correcting..."
-    cd ..
-    log_info "Moved to $(pwd)"
-    log_info "Removing redundant n8n-install directory..."
-    rm -rf "n8n-install"
-    log_info "Redundant directory removed."
-    # Re-evaluate SCRIPT_DIR after potential path correction
-    SCRIPT_DIR_REALPATH_TEMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-    if [[ "$SCRIPT_DIR_REALPATH_TEMP" == *"/n8n-install/n8n-install/scripts" ]]; then
-        # If SCRIPT_DIR is still pointing to the nested structure's scripts dir, adjust it
-        # This happens if the script was invoked like: sudo bash n8n-install/scripts/install.sh
-        # from the outer n8n-install directory.
-        # We need to ensure that relative paths for other scripts are correct.
-        # The most robust way is to re-execute the script from the corrected location
-        # if the SCRIPT_DIR itself was nested.
-        log_info "Re-executing install script from corrected path..."
-        exec sudo bash "./scripts/install.sh" "$@"
+for _repo_dir in "selfhost-ai" "n8n-install"; do
+    if [[ "$current_path" == *"/${_repo_dir}/${_repo_dir}" ]]; then
+        log_info "Detected nested ${_repo_dir} directory. Correcting..."
+        cd ..
+        log_info "Moved to $(pwd)"
+        log_info "Removing redundant ${_repo_dir} directory..."
+        rm -rf "${_repo_dir}"
+        log_info "Redundant directory removed."
+        # Re-evaluate SCRIPT_DIR after potential path correction
+        SCRIPT_DIR_REALPATH_TEMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+        if [[ "$SCRIPT_DIR_REALPATH_TEMP" == *"/${_repo_dir}/${_repo_dir}/scripts" ]]; then
+            # If SCRIPT_DIR is still pointing to the nested structure's scripts dir, adjust it
+            # This happens if the script was invoked like: sudo bash selfhost-ai/scripts/install.sh
+            # from the outer project directory.
+            # We need to ensure that relative paths for other scripts are correct.
+            # The most robust way is to re-execute the script from the corrected location
+            # if the SCRIPT_DIR itself was nested.
+            log_info "Re-executing install script from corrected path..."
+            exec sudo bash "./scripts/install.sh" "$@"
+        fi
+        break
     fi
-fi
+done
 
 # Initialize paths using utils.sh helper
 init_paths

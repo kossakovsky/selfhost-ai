@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature or service for n8n-install
+about: Suggest a new feature or service for Selfhost AI
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''

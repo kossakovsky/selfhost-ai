@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# telemetry.sh - Anonymous telemetry for n8n-install
+# telemetry.sh - Anonymous telemetry for Selfhost AI
 # =============================================================================
 # Sends anonymous usage statistics to help improve the project.
 # No personal data is collected. Users can opt-out by setting:
@@ -21,6 +21,8 @@
 # =============================================================================
 
 # Scarf endpoint for anonymous telemetry
+# The /n8n-install path is the project's original name; the Scarf endpoint
+# was registered before the selfhost-ai rename and must stay unchanged
 SCARF_ENDPOINT="https://kossakovsky.gateway.scarf.sh/n8n-install"
 
 #=============================================================================

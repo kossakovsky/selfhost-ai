@@ -1,6 +1,6 @@
 # Self-Hosted AI Automation Platform
 
-[![GitHub stars](https://img.shields.io/github/stars/kossakovsky/n8n-install?style=social)](https://github.com/kossakovsky/n8n-install/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/kossakovsky/selfhost-ai?style=social)](https://github.com/kossakovsky/selfhost-ai/stargazers)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://www.docker.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-E95420?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
@@ -158,7 +158,7 @@ The recommended way to install is using the provided main installation script.
 2.  Run the following command:
 
     ```bash
-    git clone https://github.com/kossakovsky/n8n-install && cd n8n-install && sudo bash ./scripts/install.sh
+    git clone https://github.com/kossakovsky/selfhost-ai && cd selfhost-ai && sudo bash ./scripts/install.sh
     ```
 
 This single command automates the entire setup process, including:
@@ -435,7 +435,7 @@ When you build automations in n8n that need to read or write files on your serve
 
 ## Contributors
 
-Want to see who has contributed to this project? Check out the [**GitHub Contributors Page**](https://github.com/kossakovsky/n8n-install/graphs/contributors)!
+Want to see who has contributed to this project? Check out the [**GitHub Contributors Page**](https://github.com/kossakovsky/selfhost-ai/graphs/contributors)!
 
 ## Telemetry
 

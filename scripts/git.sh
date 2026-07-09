@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# git.sh - Git utilities for n8n-install scripts
+# git.sh - Git utilities for Selfhost AI scripts
 # =============================================================================
 # Provides git-related functions for repository management.
 #

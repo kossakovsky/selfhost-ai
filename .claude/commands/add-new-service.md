@@ -1,6 +1,6 @@
 # Add New Service: $ARGUMENTS
 
-Add a new optional service called **$ARGUMENTS** to the n8n-install project.
+Add a new optional service called **$ARGUMENTS** to the Selfhost AI project.
 
 ## Naming Conventions
 
