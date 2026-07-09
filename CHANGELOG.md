@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- **Cloudflare Tunnel** - Configurable transport protocol via `CLOUDFLARE_TUNNEL_PROTOCOL` in `.env`: `auto` (default, prefers QUIC with HTTP/2 fallback), `quic`, or `http2`. Set `http2` if your ISP or firewall blocks UDP and the tunnel is unstable (#69).
+
 ## [1.6.0] - 2026-07-01
 
 ### Added

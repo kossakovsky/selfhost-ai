@@ -410,6 +410,14 @@ curl -sI https://yourdomain.com 2>/dev/null | grep -q "cf-ray" && echo "✓ Traf
 - This warning in logs is normal for token-based tunnels
 - Does not affect functionality — tunnel still works
 
+**Tunnel unstable or failing to connect (QUIC/UDP blocked):**
+- Some ISPs and firewalls block UDP traffic, which the QUIC protocol requires
+- **Solution**: Set `CLOUDFLARE_TUNNEL_PROTOCOL=http2` in `.env` (uses TCP instead) and recreate the tunnel:
+  ```bash
+  docker compose -p localai up -d --force-recreate cloudflared
+  ```
+- Valid values: `auto` (default, prefers QUIC and falls back to HTTP/2 at startup), `quic`, `http2`
+
 **Mixed mode (tunnel + direct access):**
 - You can run both tunnel and traditional Caddy access simultaneously
 - Useful for testing before closing firewall ports

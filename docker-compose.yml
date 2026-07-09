@@ -403,7 +403,7 @@ services:
     container_name: cloudflared
     profiles: ["cloudflare-tunnel"]
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
+    command: tunnel --no-autoupdate run --protocol ${CLOUDFLARE_TUNNEL_PROTOCOL:-auto}
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
     logging: *default-logging
