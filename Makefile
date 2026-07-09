@@ -3,7 +3,7 @@
 PROJECT_NAME := localai
 
 help:
-	@echo "n8n-install - Available commands:"
+	@echo "Selfhost AI - Available commands:"
 	@echo ""
 	@echo "  make install           Full installation"
 	@echo "  make update            Update system and services (resets to origin)"

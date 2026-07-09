@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug with n8n-install
+about: Report a bug with Selfhost AI
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -30,7 +30,7 @@ What actually happened. Include any error messages.
 - **OS**: [e.g., Ubuntu 24.04, Debian 12, macOS Sonoma]
 - **Docker version**: [e.g., 27.0.3]
 - **Docker Compose version**: [e.g., v2.29.1]
-- **n8n-install branch**: [main/develop]
+- **Selfhost AI branch**: [main/develop]
 - **Affected service(s)**: [e.g., n8n, flowise, caddy]
 
 ## Configuration

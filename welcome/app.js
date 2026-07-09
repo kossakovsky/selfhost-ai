@@ -1,5 +1,5 @@
 /**
- * n8n-install Welcome Page
+ * Selfhost AI Welcome Page
  * Dynamic rendering of services and credentials from data.json
  */
 
@@ -10,7 +10,7 @@
     // CINEMATIC ANIMATIONS MODULE
     // ============================================
     const CinematicAnimations = {
-        CONFETTI_STORAGE_KEY: 'n8n_install_welcomed',
+        CONFETTI_STORAGE_KEY: 'selfhost_ai_welcomed',
 
         isFirstVisit() {
             return !localStorage.getItem(this.CONFETTI_STORAGE_KEY);

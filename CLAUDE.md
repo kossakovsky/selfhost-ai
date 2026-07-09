@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **n8n-install**, a Docker Compose-based installer that provides a comprehensive self-hosted environment for n8n workflow automation and numerous AI/automation services. The installer includes an interactive wizard, automated secret generation, and integrated HTTPS via Caddy.
+This is **Selfhost AI** (repository `selfhost-ai`, formerly `n8n-install`), a Docker Compose-based installer that provides a comprehensive self-hosted environment for n8n workflow automation and numerous AI/automation services. The installer includes an interactive wizard, automated secret generation, and integrated HTTPS via Caddy.
 
 ### Core Architecture
 
@@ -148,7 +148,7 @@ This project uses [Semantic Versioning](https://semver.org/). When updating `CHA
 1. Move items from `[Unreleased]` to new version section
 2. Add comparison link at bottom of file:
    ```markdown
-   [2.6.0]: https://github.com/kossakovsky/n8n-install/compare/v2.5.3...v2.6.0
+   [2.6.0]: https://github.com/kossakovsky/selfhost-ai/compare/v2.5.3...v2.6.0
    ```
 3. Update `[Unreleased]` link to compare from new version
 

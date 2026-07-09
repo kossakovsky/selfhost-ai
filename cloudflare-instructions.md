@@ -24,7 +24,7 @@ Cloudflare Tunnel **bypasses Caddy** and connects directly to your services. Thi
 2. Navigate to **Networks** → **Connectors** → **Cloudflare Tunnels**
 3. Click **Create a tunnel**
 4. Select **Cloudflared** as the connector type and click **Next**
-5. Name your tunnel (e.g., "n8n-install") and click **Save tunnel**
+5. Name your tunnel (e.g., "selfhost-ai") and click **Save tunnel**
 6. Copy the installation command shown - it contains your tunnel token
 
 #### 2. DNS Configuration (Critical!)
@@ -152,7 +152,7 @@ After DNS is configured, go to **Cloudflare One Dashboard** → **Networks** →
 
 #### 4. Install with Tunnel Support
 
-1. Run the n8n-install as normal:
+1. Run the Selfhost AI installation as normal:
    ```bash
    sudo bash ./scripts/install.sh
    ```

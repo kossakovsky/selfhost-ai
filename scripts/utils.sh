@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# utils.sh - Shared utilities for n8n-install scripts
+# utils.sh - Shared utilities for Selfhost AI scripts
 # =============================================================================
 # Common functions and utilities used across all installation scripts.
 #
@@ -795,7 +795,7 @@ backup_preserved_dirs() {
     fi
 
     # Create secure temporary directory
-    backup_base=$(mktemp -d /tmp/n8n-install-backup.XXXXXXXXXX) || {
+    backup_base=$(mktemp -d /tmp/selfhost-ai-backup.XXXXXXXXXX) || {
         echo "[ERROR] Failed to create backup directory" >&2
         return 1
     }

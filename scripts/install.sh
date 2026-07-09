@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# install.sh - Main installation orchestrator for n8n-install
+# install.sh - Main installation orchestrator for Selfhost AI
 # =============================================================================
 # This script runs the complete installation process by sequentially executing
 # 8 installation steps:
@@ -21,28 +21,33 @@ set -e
 # Source the utilities file
 source "$(dirname "$0")/utils.sh"
 
-# Check for nested n8n-install directory
+# Check for nested project directory (the repo can be cloned as
+# selfhost-ai or, via the pre-rename URLs, n8n-install / n8n-installer)
 current_path=$(pwd)
-if [[ "$current_path" == *"/n8n-install/n8n-install" ]]; then
-    log_info "Detected nested n8n-install directory. Correcting..."
-    cd ..
-    log_info "Moved to $(pwd)"
-    log_info "Removing redundant n8n-install directory..."
-    rm -rf "n8n-install"
-    log_info "Redundant directory removed."
-    # Re-evaluate SCRIPT_DIR after potential path correction
-    SCRIPT_DIR_REALPATH_TEMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-    if [[ "$SCRIPT_DIR_REALPATH_TEMP" == *"/n8n-install/n8n-install/scripts" ]]; then
-        # If SCRIPT_DIR is still pointing to the nested structure's scripts dir, adjust it
-        # This happens if the script was invoked like: sudo bash n8n-install/scripts/install.sh
-        # from the outer n8n-install directory.
-        # We need to ensure that relative paths for other scripts are correct.
-        # The most robust way is to re-execute the script from the corrected location
-        # if the SCRIPT_DIR itself was nested.
-        log_info "Re-executing install script from corrected path..."
-        exec sudo bash "./scripts/install.sh" "$@"
+for _repo_dir in "selfhost-ai" "n8n-install" "n8n-installer"; do
+    if [[ "$current_path" == *"/${_repo_dir}/${_repo_dir}" ]]; then
+        # Only treat this as an accidental nested clone if the parent
+        # directory is itself a copy of this repository - the third marker
+        # is unique to this project, so a foreign compose stack that happens
+        # to ship scripts/install.sh is not mistaken for one. A same-named
+        # plain folder holding a fresh clone (e.g. ~/selfhost-ai/selfhost-ai)
+        # is a normal layout: install from the current clone, delete nothing.
+        if [[ -f "../scripts/install.sh" && -f "../docker-compose.yml" && -f "../scripts/generate_n8n_workers.sh" ]]; then
+            log_info "Detected nested ${_repo_dir} clone inside another copy of the repository. Correcting..."
+            # The outer copy wins and may be older than the clone being
+            # removed - surface both versions so a downgrade is visible
+            log_info "Keeping outer copy (version $(cat ../VERSION 2>/dev/null || echo 'unknown')), removing nested clone (version $(cat VERSION 2>/dev/null || echo 'unknown'))."
+            cd .. || { log_error "Failed to enter the outer directory. Aborting."; exit 1; }
+            rm -rf "${_repo_dir}" || { log_error "Failed to remove the nested ${_repo_dir} directory. Remove it manually and re-run the installer."; exit 1; }
+            # The deleted clone may be where this script was loaded from, so
+            # relative paths can no longer be trusted: restart the installer
+            # from the surviving outer copy.
+            log_info "Re-executing installer from $(pwd)..."
+            exec sudo bash "./scripts/install.sh" "$@"
+        fi
+        break
     fi
-fi
+done
 
 # Initialize paths using utils.sh helper
 init_paths
