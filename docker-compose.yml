@@ -634,7 +634,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: "${OLLAMA_GPU_COUNT:-1}"
               capabilities: [gpu]
 
   ollama-gpu-amd:
@@ -673,7 +673,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: "${INVOKEAI_GPU_COUNT:-1}"
               capabilities: [gpu]
 
   invokeai-amd:

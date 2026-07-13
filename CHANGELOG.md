@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-07-13
+
+### Fixed
+- **Ollama / InvokeAI** - Fix `make update` resetting custom multi-GPU setups back to a single GPU. The NVIDIA GPU count was hardcoded as `count: 1` in `docker-compose.yml`, so any manual edit was wiped by the update's git reset. The count is now read from `.env` (`OLLAMA_GPU_COUNT` and `INVOKEAI_GPU_COUNT`, default `1`; set a number or `all`), which survives updates - the variables are added to existing `.env` files automatically on the next `make update` (#81).
+
 ## [1.7.1] - 2026-07-09
 
 ### Changed
