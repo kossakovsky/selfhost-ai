@@ -88,6 +88,12 @@ MAIN_COMPOSE_FILES=("-f" "$PROJECT_ROOT/docker-compose.yml")
 if path=$(get_n8n_workers_compose); then
     MAIN_COMPOSE_FILES+=("-f" "$path")
 fi
+if path=$(get_ollama_gpu_devices_compose); then
+    MAIN_COMPOSE_FILES+=("-f" "$path")
+fi
+if path=$(get_invokeai_gpu_devices_compose); then
+    MAIN_COMPOSE_FILES+=("-f" "$path")
+fi
 OVERRIDE_COMPOSE="$PROJECT_ROOT/docker-compose.override.yml"
 if [ -f "$OVERRIDE_COMPOSE" ]; then
     MAIN_COMPOSE_FILES+=("-f" "$OVERRIDE_COMPOSE")

@@ -390,9 +390,13 @@ build_compose_files_array() {
     fi
     if path=$(get_ollama_gpu_devices_compose); then
         COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${OLLAMA_GPU_DEVICES:-}" ]; then
+        log_warning "OLLAMA_GPU_DEVICES is set but GPU pinning is NOT applied (requires the gpu-nvidia profile and docker-compose.ollama-gpu-devices.yml)"
     fi
     if path=$(get_invokeai_gpu_devices_compose); then
         COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${INVOKEAI_GPU_DEVICES:-}" ]; then
+        log_warning "INVOKEAI_GPU_DEVICES is set but GPU pinning is NOT applied (requires the invokeai-nvidia profile and docker-compose.invokeai-gpu-devices.yml)"
     fi
     if path=$(get_supabase_compose); then
         COMPOSE_FILES+=("-f" "$path")

@@ -33,11 +33,18 @@ def get_gpu_devices_compose_files():
     env_values = dotenv_values(".env")
     profiles = env_values.get("COMPOSE_PROFILES", "").split(',')
     files = []
-    if "gpu-nvidia" in profiles and env_values.get("OLLAMA_GPU_DEVICES"):
-        files.append("docker-compose.ollama-gpu-devices.yml")
-    if "invokeai-nvidia" in profiles and env_values.get("INVOKEAI_GPU_DEVICES"):
-        files.append("docker-compose.invokeai-gpu-devices.yml")
-    return [f for f in files if os.path.exists(f)]
+    for var, profile, compose_file in [
+        ("OLLAMA_GPU_DEVICES", "gpu-nvidia", "docker-compose.ollama-gpu-devices.yml"),
+        ("INVOKEAI_GPU_DEVICES", "invokeai-nvidia", "docker-compose.invokeai-gpu-devices.yml"),
+    ]:
+        if not env_values.get(var):
+            continue
+        if profile in profiles and os.path.exists(compose_file):
+            files.append(compose_file)
+        else:
+            print(f"Warning: {var} is set but GPU pinning is NOT applied "
+                  f"(requires the {profile} profile and {compose_file}).")
+    return files
 
 def get_all_profiles(compose_file):
     """Get all profile names from a docker-compose file."""
