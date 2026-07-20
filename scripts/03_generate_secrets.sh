@@ -47,7 +47,6 @@ EMAIL_VARS=(
     "COMFYUI_USERNAME"
     "DASHBOARD_USERNAME"
     "DOCLING_USERNAME"
-    "HERMES_USERNAME"
     "INVOKEAI_USERNAME"
     "LANGFUSE_INIT_USER_EMAIL"
     "LETSENCRYPT_EMAIL"
@@ -87,9 +86,6 @@ declare -A VARS_TO_GENERATE=(
     ["GOST_PASSWORD"]="password:32"
     ["GOST_USERNAME"]="fixed:gost"
     ["GRAFANA_ADMIN_PASSWORD"]="password:32"
-    ["HERMES_API_SERVER_KEY"]="secret:48" # Bearer token for Hermes OpenAI-compatible API
-    ["HERMES_DASHBOARD_SECRET"]="secret:64" # Session secret for Hermes dashboard basic auth
-    ["HERMES_PASSWORD"]="password:32" # Hermes dashboard basic auth password
     ["INVOKEAI_PASSWORD"]="password:32" # InvokeAI Caddy basic auth password
     ["JWT_SECRET"]="base64:64" # 48 bytes -> 64 chars
     ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"]="langfuse_pk:32"

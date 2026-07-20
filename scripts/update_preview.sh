@@ -130,11 +130,6 @@ elif is_profile_active "invokeai-cpu"; then
     check_image_update "invokeai" "ghcr.io/invoke-ai/invokeai:main-cpu"
 fi
 
-if is_profile_active "hermes"; then
-    log_subheader "Hermes Agent"
-    check_image_update "hermes" "nousresearch/hermes-agent:latest"
-fi
-
 if is_profile_active "qdrant"; then
     log_subheader "Qdrant"
     check_image_update "qdrant" "qdrant/qdrant:latest"

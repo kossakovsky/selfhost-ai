@@ -713,6 +713,34 @@ cleanup_legacy_postgresus() {
     fi
 }
 
+# Clean up the Hermes Agent service removed from the stack (issue #88)
+# Drops the 'hermes' profile from COMPOSE_PROFILES and removes the container.
+# User data in ./hermes is intentionally left untouched.
+# Usage: cleanup_removed_hermes
+cleanup_removed_hermes() {
+    local container_name="hermes"
+
+    # Drop the profile from .env if still present
+    local profiles
+    profiles=$(read_env_var "COMPOSE_PROFILES")
+    if [[ ",${profiles}," == *",hermes,"* ]]; then
+        local new_profiles=",${profiles},"
+        new_profiles="${new_profiles//,hermes,/,}"
+        new_profiles="${new_profiles#,}"
+        new_profiles="${new_profiles%,}"
+        update_compose_profiles "$new_profiles"
+        log_info "Removed 'hermes' from COMPOSE_PROFILES (Hermes Agent is no longer part of the stack)."
+    fi
+
+    # Remove the container if it exists (running or stopped)
+    if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+        log_info "Removing Hermes Agent container (service removed from the stack)..."
+        docker stop "$container_name" 2>/dev/null || true
+        docker rm -f "$container_name" 2>/dev/null || true
+        log_success "Hermes container removed. Your data in ./hermes is left untouched."
+    fi
+}
+
 #=============================================================================
 # USER DETECTION
 #=============================================================================

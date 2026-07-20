@@ -106,9 +106,6 @@ fi
 if is_profile_active "uptime-kuma"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Uptime Kuma${NC}: Create your account on first login"
 fi
-if is_profile_active "hermes"; then
-    echo -e "     ${GREEN}*${NC} ${WHITE}Hermes Agent${NC}: Set an LLM provider key first: 'docker compose -p localai run --rm hermes setup' (or edit ./hermes/.env)"
-fi
 if is_profile_active "gost"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Gost Proxy${NC}: Routing AI traffic through external proxy"
 fi
