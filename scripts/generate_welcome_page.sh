@@ -418,10 +418,11 @@ if is_profile_active "crawl4ai"; then
     SERVICES_ARRAY+=("    \"crawl4ai\": {
       \"hostname\": null,
       \"credentials\": {
-        \"note\": \"Internal service only\"
+        \"api_token\": \"$(json_escape "$CRAWL4AI_API_TOKEN")\"
       },
       \"extra\": {
-        \"internal_api\": \"http://crawl4ai:11235\"
+        \"internal_api\": \"http://crawl4ai:11235\",
+        \"recommendation\": \"Requests must send header: Authorization: Bearer <API Token>\"
       }
     }")
 fi
