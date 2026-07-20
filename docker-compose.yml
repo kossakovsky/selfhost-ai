@@ -1074,8 +1074,10 @@ services:
     container_name: python-runner
     profiles: ["python-runner"]
     restart: unless-stopped
+    # init + exec make SIGTERM reach python so the container stops fast
+    init: true
     working_dir: /app
-    command: /bin/sh -c 'if [ -f /app/requirements.txt ]; then python -m pip install --no-cache-dir -r /app/requirements.txt; fi; python /app/main.py'
+    command: /bin/sh -c 'if [ -f /app/requirements.txt ]; then python -m pip install --no-cache-dir -r /app/requirements.txt; fi; exec python /app/main.py'
     volumes:
       - ./python-runner:/app
 
