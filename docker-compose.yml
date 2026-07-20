@@ -766,6 +766,9 @@ services:
       - .env
     environment:
       <<: *proxy-env
+      # Without a token Crawl4AI 0.9+ binds 127.0.0.1 only and is unreachable
+      # from other containers; with it the API listens on the Docker network.
+      CRAWL4AI_API_TOKEN: "${CRAWL4AI_API_TOKEN}"
     deploy:
       resources:
         limits:

@@ -80,6 +80,7 @@ declare -A VARS_TO_GENERATE=(
     ["APPSMITH_ENCRYPTION_SALT"]="password:32"
     ["CLICKHOUSE_PASSWORD"]="password:32"
     ["COMFYUI_PASSWORD"]="password:32" # Added ComfyUI basic auth password
+    ["CRAWL4AI_API_TOKEN"]="secret:48" # Bearer token; Crawl4AI 0.9+ binds loopback only without it
     ["DASHBOARD_PASSWORD"]="password:32" # Supabase Dashboard
     ["DIFY_SECRET_KEY"]="secret:64" # Dify application secret key (maps to SECRET_KEY in Dify)
     ["DOCLING_PASSWORD"]="password:32"
