@@ -178,7 +178,7 @@ services:
     volumes:
       - appsmith_data:/appsmith-stacks
     healthcheck:
-      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= wget -qO- http://localhost/api/v1/health || exit 1"]
+      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -fsS http://localhost/api/v1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -783,7 +783,7 @@ services:
     environment:
       DISABLE_GOOGLE_CHROME: false
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1023,7 +1023,7 @@ services:
     volumes:
       - databasus_data:/databasus-data
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:4005/ || exit 1"]
+      test: ["CMD", "databasus", "healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -1039,7 +1039,7 @@ services:
     volumes:
       - comfyui_data:/home/runner
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8188"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8188', timeout=5)"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -1102,7 +1102,7 @@ services:
       - paddlex_data:/root/.paddlex
     healthcheck:
       test:
-        ["CMD-SHELL", "wget -qO- http://localhost:8080 > /dev/null || exit 1"]
+        ["CMD-SHELL", "wget -qO- http://localhost:8080/health > /dev/null || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -1347,7 +1347,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= wget -qO- http://localhost:9621/health > /dev/null 2>&1 || exit 1",
+          "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= python -c \"import urllib.request; urllib.request.urlopen('http://localhost:9621/health', timeout=5)\" > /dev/null 2>&1 || exit 1",
         ]
       interval: 30s
       timeout: 10s
