@@ -72,6 +72,17 @@ if [ -f "$ENV_FILE" ]; then
         fi
     fi
 
+    # Crawl4AI 0.9+ binds loopback only when CRAWL4AI_API_TOKEN is empty, so the
+    # container looks "Up" while other containers get connection refused. A
+    # healthcheck cannot catch this (localhost works either way), so check here.
+    if is_profile_active "crawl4ai"; then
+        if [ -n "$CRAWL4AI_API_TOKEN" ]; then
+            count_ok "CRAWL4AI_API_TOKEN is set (Crawl4AI listens on the Docker network)"
+        else
+            count_error "crawl4ai profile is active but CRAWL4AI_API_TOKEN is empty — Crawl4AI binds loopback only and other containers cannot reach it. Run 'make update' to generate the token."
+        fi
+    fi
+
 else
     count_error ".env file not found at $ENV_FILE"
     print_info "Run 'make install' to set up the environment."

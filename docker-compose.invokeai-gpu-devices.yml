@@ -1,7 +1,8 @@
 # GPU pinning override for InvokeAI (NVIDIA only).
 #
 # This file is included automatically by the stack's scripts when
-# INVOKEAI_GPU_DEVICES is set to a non-empty value in .env (for example
+# INVOKEAI_GPU_DEVICES is set to a non-empty value in .env
+# (and the invokeai-nvidia profile is active) (for example
 # INVOKEAI_GPU_DEVICES=0). It replaces the count-based GPU reservation of the
 # invokeai-nvidia service with an explicit list of GPU device IDs, so InvokeAI
 # only sees the listed GPUs. When INVOKEAI_GPU_DEVICES is empty, this file is

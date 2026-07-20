@@ -762,23 +762,29 @@ cleanup_removed_hermes() {
         new_profiles="${new_profiles//,hermes,/,}"
         new_profiles="${new_profiles#,}"
         new_profiles="${new_profiles%,}"
-        update_compose_profiles "$new_profiles"
-        log_info "Removed 'hermes' from COMPOSE_PROFILES (Hermes Agent is no longer part of the stack)."
+        if update_compose_profiles "$new_profiles"; then
+            log_info "Removed 'hermes' from COMPOSE_PROFILES (Hermes Agent is no longer part of the stack)."
+        else
+            log_warning "Could not update COMPOSE_PROFILES in .env (is it writable?). Remove 'hermes' from it manually."
+        fi
     fi
 
     # Remove the container if it exists (running or stopped)
     if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
         log_info "Removing Hermes Agent container (service removed from the stack)..."
-        docker stop "$container_name" 2>/dev/null || true
-        docker rm -f "$container_name" 2>/dev/null || true
-        log_success "Hermes container removed. Your data in ./hermes is left untouched."
+        docker stop "$container_name" >/dev/null 2>&1 || true
+        if docker rm -f "$container_name" >/dev/null 2>&1; then
+            log_success "Hermes container removed. Your data in ./hermes is left untouched."
+        else
+            log_warning "Could not remove the 'hermes' container automatically. Remove it manually: docker rm -f hermes"
+        fi
     fi
 
     # A leftover hermes block in docker-compose.override.yml (the old README
     # suggested one for the docker.sock mount) now breaks 'docker compose'
     # because the base service no longer exists - warn with the actual fix
     local override_file="$PROJECT_ROOT/docker-compose.override.yml"
-    if [ -f "$override_file" ] && grep -Eq '^[[:space:]]+hermes:[[:space:]]*$' "$override_file"; then
+    if [ -f "$override_file" ] && grep -Eq '^[[:space:]]+hermes:[[:space:]]*(#|$)' "$override_file"; then
         log_warning "docker-compose.override.yml contains a 'hermes:' service block, but Hermes was removed from the stack. Delete that block from the file, or 'docker compose' commands will fail."
     fi
 }
