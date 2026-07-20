@@ -739,6 +739,14 @@ cleanup_removed_hermes() {
         docker rm -f "$container_name" 2>/dev/null || true
         log_success "Hermes container removed. Your data in ./hermes is left untouched."
     fi
+
+    # A leftover hermes block in docker-compose.override.yml (the old README
+    # suggested one for the docker.sock mount) now breaks 'docker compose'
+    # because the base service no longer exists - warn with the actual fix
+    local override_file="$PROJECT_ROOT/docker-compose.override.yml"
+    if [ -f "$override_file" ] && grep -Eq '^[[:space:]]+hermes:[[:space:]]*$' "$override_file"; then
+        log_warning "docker-compose.override.yml contains a 'hermes:' service block, but Hermes was removed from the stack. Delete that block from the file, or 'docker compose' commands will fail."
+    fi
 }
 
 #=============================================================================
