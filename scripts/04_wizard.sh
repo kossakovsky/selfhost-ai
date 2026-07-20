@@ -48,7 +48,6 @@ base_services_data=(
     "flowise" "Flowise (AI Agent Builder)"
     "gost" "Gost Proxy (HTTP/HTTPS proxy for AI services outbound traffic)"
     "gotenberg" "Gotenberg (Document Conversion API)"
-    "hermes" "Hermes Agent (Autonomous AI agent: skills, memory, MCP)"
     "invokeai" "InvokeAI (Stable Diffusion Studio - select hardware in next step)"
     "langfuse" "Langfuse Suite (AI Observability - includes Clickhouse, Minio)"
     "letta" "Letta (Agent Server & SDK)"

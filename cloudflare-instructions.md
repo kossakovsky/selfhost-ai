@@ -117,8 +117,6 @@ After DNS is configured, go to **Cloudflare One Dashboard** → **Networks** →
 | **Docling**        | docling.yourdomain.com        | `http://docling:5001`        | ⚠️ Loses Caddy auth  |
 | **Flowise**        | flowise.yourdomain.com        | `http://flowise:3001`        | Built-in login      |
 | **Grafana**        | grafana.yourdomain.com        | `http://grafana:3000`        | Built-in login      |
-| **Hermes Agent**   | hermes.yourdomain.com         | `http://hermes:9119`         | Built-in login      |
-| **Hermes API**     | hermes-api.yourdomain.com     | `http://hermes:8642`         | Bearer token        |
 | **InvokeAI**       | invokeai.yourdomain.com       | `http://invokeai:9090`       | ⚠️ Loses Caddy auth  |
 | **Langfuse**       | langfuse.yourdomain.com       | `http://langfuse-web:3000`   | Built-in login      |
 | **Letta**          | letta.yourdomain.com          | `http://letta:8283`          | No auth             |

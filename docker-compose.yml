@@ -367,8 +367,6 @@ services:
       DOCLING_USERNAME: "${DOCLING_USERNAME}"
       FLOWISE_HOSTNAME: "${FLOWISE_HOSTNAME}"
       GRAFANA_HOSTNAME: "${GRAFANA_HOSTNAME}"
-      HERMES_API_HOSTNAME: "${HERMES_API_HOSTNAME}"
-      HERMES_HOSTNAME: "${HERMES_HOSTNAME}"
       INVOKEAI_HOSTNAME: "${INVOKEAI_HOSTNAME}"
       INVOKEAI_PASSWORD_HASH: "${INVOKEAI_PASSWORD_HASH}"
       INVOKEAI_USERNAME: "${INVOKEAI_USERNAME}"
@@ -803,40 +801,6 @@ services:
       LETTA_SERVER_PASSWORD: "${LETTA_SERVER_PASSWORD:-}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  hermes:
-    image: nousresearch/hermes-agent:latest
-    container_name: hermes
-    profiles: ["hermes"]
-    restart: unless-stopped
-    logging: *default-logging
-    command: ["gateway", "run"]
-    volumes:
-      - ./hermes:/opt/data
-    environment:
-      <<: *proxy-env
-      HERMES_UID: "${HERMES_UID:-10000}"
-      HERMES_GID: "${HERMES_GID:-10000}"
-      # Web dashboard (port 9119) - runs supervised alongside the gateway.
-      # Hermes refuses to serve the dashboard on a non-loopback bind without
-      # an auth provider, so basic auth credentials are required.
-      HERMES_DASHBOARD: "1"
-      HERMES_DASHBOARD_BASIC_AUTH_USERNAME: "${HERMES_USERNAME:-}"
-      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: "${HERMES_PASSWORD:-}"
-      HERMES_DASHBOARD_BASIC_AUTH_SECRET: "${HERMES_DASHBOARD_SECRET:-}"
-      # OpenAI-compatible API server (port 8642) - lets n8n call Hermes at
-      # http://hermes:8642/v1 with 'Authorization: Bearer <HERMES_API_SERVER_KEY>'.
-      # The server refuses to start without a key.
-      API_SERVER_ENABLED: "true"
-      API_SERVER_HOST: "0.0.0.0"
-      API_SERVER_KEY: "${HERMES_API_SERVER_KEY:-}"
-    healthcheck:
-      # Second probe checks the dashboard accepts connections (401 still passes,
-      # connection refused fails) - the two components can die independently
-      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -fsS http://localhost:8642/health && http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -s -o /dev/null http://localhost:9119/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   weaviate:
     image: cr.weaviate.io/semitechnologies/weaviate:latest

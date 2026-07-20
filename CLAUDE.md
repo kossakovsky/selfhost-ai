@@ -237,7 +237,7 @@ Common profiles:
 - `dify`: Dify AI platform (external compose, cloned at runtime; mutually exclusive with `supabase`)
 - `gost`: HTTP/HTTPS proxy for routing AI service outbound traffic
 - `python-runner`: Internal Python execution environment (no external access)
-- `searxng`, `letta`, `hermes`, `lightrag`, `libretranslate`, `crawl4ai`, `docling`, `waha`, `comfyui`, `paddleocr`, `ragapp`, `gotenberg`, `postiz`: Additional optional services
+- `searxng`, `letta`, `lightrag`, `libretranslate`, `crawl4ai`, `docling`, `waha`, `comfyui`, `paddleocr`, `ragapp`, `gotenberg`, `postiz`: Additional optional services
 
 ## Architecture Patterns
 
