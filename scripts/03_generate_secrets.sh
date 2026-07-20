@@ -546,10 +546,12 @@ done
 # Variables that exist in the current .env but were not written by the template
 # pass above (custom user variables, uncommented opt-ins like SCARF_ANALYTICS,
 # INSTALLATION_ID from telemetry.sh) would otherwise be silently dropped.
-# Append them under a marked section. The section is rebuilt on every run, so
-# repeated updates never duplicate entries. This runs before the WAHA/GOST/hash
-# blocks below so intentional removals (e.g. GOST_PROXY_URL when the gost
-# profile is disabled) still take effect afterwards.
+# Append them under a marked section. The whole .env was regenerated from the
+# template above, so the previous run's section is already gone and repeated
+# updates never duplicate entries. This block must run before the WAHA/GOST/hash
+# blocks below: they intentionally remove some variables (e.g. GOST_PROXY_URL
+# when the gost profile is disabled), and running after them would re-append
+# the removed values.
 preserved_header_written=0
 while IFS= read -r varName; do
     # Only preserve valid variable names; skips garbage from malformed lines
@@ -559,6 +561,7 @@ while IFS= read -r varName; do
             {
                 echo ""
                 echo "# --- Preserved user variables (not in template) ---"
+                echo "# Note: the installer also re-appends its own managed variables below this line"
             } >> "$OUTPUT_FILE"
             preserved_header_written=1
         fi
