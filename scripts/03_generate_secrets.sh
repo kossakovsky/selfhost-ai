@@ -542,6 +542,38 @@ for key in "${!generated_values[@]}"; do
     rm -f "$value_file"
 done
 
+# --- Preserve variables not present in the template ---
+# Variables that exist in the current .env but were not written by the template
+# pass above (custom user variables, uncommented opt-ins like SCARF_ANALYTICS,
+# INSTALLATION_ID from telemetry.sh) would otherwise be silently dropped.
+# Append them under a marked section. The section is rebuilt on every run, so
+# repeated updates never duplicate entries. This runs before the WAHA/GOST/hash
+# blocks below so intentional removals (e.g. GOST_PROXY_URL when the gost
+# profile is disabled) still take effect afterwards.
+preserved_header_written=0
+while IFS= read -r varName; do
+    # Only preserve valid variable names; skips garbage from malformed lines
+    [[ "$varName" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+    if ! grep -q "^${varName}=" "$OUTPUT_FILE"; then
+        if [[ $preserved_header_written -eq 0 ]]; then
+            {
+                echo ""
+                echo "# --- Preserved user variables (not in template) ---"
+            } >> "$OUTPUT_FILE"
+            preserved_header_written=1
+        fi
+        varValue="${existing_env_vars[$varName]}"
+        # Use single quotes for values containing $ (like bcrypt hashes) to
+        # prevent variable expansion, same as _update_or_add_env_var
+        if [[ "$varValue" == *'$'* ]]; then
+            echo "${varName}='${varValue}'" >> "$OUTPUT_FILE"
+        else
+            echo "${varName}=\"${varValue}\"" >> "$OUTPUT_FILE"
+        fi
+        log_info "Preserved variable not present in template: $varName"
+    fi
+done < <(printf '%s\n' "${!existing_env_vars[@]}" | sort)
+
 # --- WAHA API KEY (sha512) --- ensure after .env write/substitutions ---
 # Generate plaintext API key if missing, then compute sha512:HEX and store in WAHA_API_KEY
 if [[ -z "${generated_values[WAHA_API_KEY_PLAIN]}" ]]; then
