@@ -330,6 +330,30 @@ get_n8n_workers_compose() {
     return 1
 }
 
+# Get Ollama GPU pinning compose file path if the gpu-nvidia profile is active
+# and OLLAMA_GPU_DEVICES has a non-empty value (requires load_env first)
+# Usage: path=$(get_ollama_gpu_devices_compose) && COMPOSE_FILES+=("-f" "$path")
+get_ollama_gpu_devices_compose() {
+    local compose_file="$PROJECT_ROOT/docker-compose.ollama-gpu-devices.yml"
+    if [ -f "$compose_file" ] && is_profile_active "gpu-nvidia" && [ -n "${OLLAMA_GPU_DEVICES:-}" ]; then
+        echo "$compose_file"
+        return 0
+    fi
+    return 1
+}
+
+# Get InvokeAI GPU pinning compose file path if the invokeai-nvidia profile is
+# active and INVOKEAI_GPU_DEVICES has a non-empty value (requires load_env first)
+# Usage: path=$(get_invokeai_gpu_devices_compose) && COMPOSE_FILES+=("-f" "$path")
+get_invokeai_gpu_devices_compose() {
+    local compose_file="$PROJECT_ROOT/docker-compose.invokeai-gpu-devices.yml"
+    if [ -f "$compose_file" ] && is_profile_active "invokeai-nvidia" && [ -n "${INVOKEAI_GPU_DEVICES:-}" ]; then
+        echo "$compose_file"
+        return 0
+    fi
+    return 1
+}
+
 # Get Supabase compose file path if profile is active and file exists
 # Usage: path=$(get_supabase_compose) && COMPOSE_FILES+=("-f" "$path")
 get_supabase_compose() {
@@ -363,6 +387,16 @@ build_compose_files_array() {
     local path
     if path=$(get_n8n_workers_compose); then
         COMPOSE_FILES+=("-f" "$path")
+    fi
+    if path=$(get_ollama_gpu_devices_compose); then
+        COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${OLLAMA_GPU_DEVICES:-}" ]; then
+        log_warning "OLLAMA_GPU_DEVICES is set but GPU pinning is NOT applied (requires the gpu-nvidia profile and docker-compose.ollama-gpu-devices.yml)"
+    fi
+    if path=$(get_invokeai_gpu_devices_compose); then
+        COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${INVOKEAI_GPU_DEVICES:-}" ]; then
+        log_warning "INVOKEAI_GPU_DEVICES is set but GPU pinning is NOT applied (requires the invokeai-nvidia profile and docker-compose.invokeai-gpu-devices.yml)"
     fi
     if path=$(get_supabase_compose); then
         COMPOSE_FILES+=("-f" "$path")
@@ -710,6 +744,48 @@ cleanup_legacy_postgresus() {
         docker stop "$container_name" 2>/dev/null || true
         docker rm -f "$container_name" 2>/dev/null || true
         log_success "Legacy postgresus container removed. Databasus will use existing data via volume alias."
+    fi
+}
+
+# Clean up the Hermes Agent service removed from the stack (issue #88)
+# Drops the 'hermes' profile from COMPOSE_PROFILES and removes the container.
+# User data in ./hermes is intentionally left untouched.
+# Usage: cleanup_removed_hermes
+cleanup_removed_hermes() {
+    local container_name="hermes"
+
+    # Drop the profile from .env if still present
+    local profiles
+    profiles=$(read_env_var "COMPOSE_PROFILES")
+    if [[ ",${profiles}," == *",hermes,"* ]]; then
+        local new_profiles=",${profiles},"
+        new_profiles="${new_profiles//,hermes,/,}"
+        new_profiles="${new_profiles#,}"
+        new_profiles="${new_profiles%,}"
+        if update_compose_profiles "$new_profiles"; then
+            log_info "Removed 'hermes' from COMPOSE_PROFILES (Hermes Agent is no longer part of the stack)."
+        else
+            log_warning "Could not update COMPOSE_PROFILES in .env (is it writable?). Remove 'hermes' from it manually."
+        fi
+    fi
+
+    # Remove the container if it exists (running or stopped)
+    if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+        log_info "Removing Hermes Agent container (service removed from the stack)..."
+        docker stop "$container_name" >/dev/null 2>&1 || true
+        if docker rm -f "$container_name" >/dev/null 2>&1; then
+            log_success "Hermes container removed. Your data in ./hermes is left untouched."
+        else
+            log_warning "Could not remove the 'hermes' container automatically. Remove it manually: docker rm -f hermes"
+        fi
+    fi
+
+    # A leftover hermes block in docker-compose.override.yml (the old README
+    # suggested one for the docker.sock mount) now breaks 'docker compose'
+    # because the base service no longer exists - warn with the actual fix
+    local override_file="$PROJECT_ROOT/docker-compose.override.yml"
+    if [ -f "$override_file" ] && grep -Eq '^[[:space:]]+hermes:[[:space:]]*(#|$)' "$override_file"; then
+        log_warning "docker-compose.override.yml contains a 'hermes:' service block, but Hermes was removed from the stack. Delete that block from the file, or 'docker compose' commands will fail."
     fi
 }
 

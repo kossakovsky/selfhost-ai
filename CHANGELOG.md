@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-07-20
+
+### Added
+- **Ollama / InvokeAI** - Optional GPU pinning for multi-GPU hosts. Set `OLLAMA_GPU_DEVICES` / `INVOKEAI_GPU_DEVICES` in `.env` (e.g. `OLLAMA_GPU_DEVICES=1,2`) to restrict a service to specific NVIDIA GPU IDs, so different workloads can own different GPUs. When the variable is empty (default), the existing count-based `*_GPU_COUNT` behavior is unchanged. NVIDIA profiles only (AMD variants use full `/dev/kfd`/`/dev/dri` passthrough); requires Docker Compose v2.24.4+ (#83).
+
+### Removed
+- **Hermes Agent** - **Breaking:** removed from the stack. An infrastructure-management agent should not run inside the environment it manages: it blurs the security boundary, couples the management layer to the workloads it controls, and creates a circular dependency (Hermes managing the Docker stack it lives in). On the next `make update`, the `hermes` profile is dropped from `COMPOSE_PROFILES` and the container is removed automatically; the data directory `./hermes` is left untouched so you can redeploy Hermes standalone with your own security model, and existing `HERMES_*` values in `.env` are kept under the preserved-variables section in case the standalone deployment needs them (delete them manually if not). If your `docker-compose.override.yml` still has a `hermes:` block, the updater warns you to delete it (#88).
+
+### Fixed
+- **Installer** - `make update` no longer silently deletes `.env` variables that are missing from `.env.example`. Custom user variables, uncommented opt-ins (e.g. `SCARF_ANALYTICS=false`), and the telemetry `INSTALLATION_ID` (which previously churned on every update) now survive updates: after the template pass, any variable found only in the old `.env` is re-appended under a `# --- Preserved user variables (not in template) ---` section, idempotently across repeated updates (#90).
+- **Crawl4AI** - Fix the service being unreachable from other containers (n8n got `ECONNREFUSED` on `http://crawl4ai:11235`). Crawl4AI 0.9+ binds to `127.0.0.1` unless an API token is set, and upstream offers no bind-only override. A `CRAWL4AI_API_TOKEN` is now auto-generated and passed to the container, so it listens on the Docker network again; clients must send `Authorization: Bearer <token>` (token shown on the Welcome Page). Existing installs get the token generated on the next `make update` (#84).
+- **Healthchecks** - Fix six services being reported `unhealthy` while running fine. LightRAG, ComfyUI, Appsmith, Gotenberg and Databasus used `wget`, which does not exist in their images; each now probes with a tool the image actually ships (curl for Appsmith/Gotenberg, python for ComfyUI/LightRAG, the native `databasus healthcheck` command for Databasus - verified against each upstream Dockerfile). PaddleOCR probed `/` (returns 404) and now probes `/health` (#85).
+- **RagFlow** - Fix startup crash-loop (`nginx: [emerg] open() "/etc/nginx/conf.d/ragflow.conf" failed`). The real cause: the `ragflow_data:/ragflow` named volume masked the whole application directory with files from an older image, including a stale entrypoint. The volume and the obsolete custom nginx config are removed; the image now manages its own nginx config, and RagFlow state lives in its MySQL/Elasticsearch/MinIO/Redis services as upstream intends. The old `localai_ragflow_data` volume is left on disk (harmless; reclaim with `docker volume rm localai_ragflow_data` after a successful start) (#86).
+- **python-runner** - Fix the default container restart-looping forever: the stock `main.py` printed one line and exited, and `restart: unless-stopped` kept restarting it, tripping `make doctor` warnings. The default script now stays alive with an idle loop, and the service uses `init: true` + `exec` so SIGTERM reaches Python directly and stops/updates are immediate instead of hanging until SIGKILL. Custom `main.py` files are preserved across updates as before (#87).
+
 ## [1.7.2] - 2026-07-13
 
 ### Fixed

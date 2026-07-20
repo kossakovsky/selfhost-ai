@@ -72,17 +72,17 @@ if [ -f "$ENV_FILE" ]; then
         fi
     fi
 
-    # Hermes API server refuses to start without a key while the gateway and
-    # dashboard keep running, so an empty key half-kills the container: n8n
-    # calls to http://hermes:8642/v1 get connection refused with no error
-    # surfaced anywhere except the container flipping to unhealthy.
-    if is_profile_active "hermes"; then
-        if [ -n "$HERMES_API_SERVER_KEY" ]; then
-            count_ok "HERMES_API_SERVER_KEY is set (Hermes OpenAI-compatible API can start)"
+    # Crawl4AI 0.9+ binds loopback only when CRAWL4AI_API_TOKEN is empty, so the
+    # container looks "Up" while other containers get connection refused. A
+    # healthcheck cannot catch this (localhost works either way), so check here.
+    if is_profile_active "crawl4ai"; then
+        if [ -n "$CRAWL4AI_API_TOKEN" ]; then
+            count_ok "CRAWL4AI_API_TOKEN is set (Crawl4AI listens on the Docker network)"
         else
-            count_error "hermes profile is active but HERMES_API_SERVER_KEY is empty — the Hermes API server will not start (connection refused on port 8642). Run 'make update' to regenerate the key."
+            count_error "crawl4ai profile is active but CRAWL4AI_API_TOKEN is empty — Crawl4AI binds loopback only and other containers cannot reach it. Run 'make update' to generate the token."
         fi
     fi
+
 else
     count_error ".env file not found at $ENV_FILE"
     print_info "Run 'make install' to set up the environment."

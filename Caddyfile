@@ -148,21 +148,6 @@ import /etc/caddy/addons/tls-snippet.conf
     reverse_proxy letta:8283
 }
 
-# Hermes Agent dashboard (auth handled by Hermes itself - the dashboard fails
-# closed and won't serve unless an auth provider such as basic auth is configured)
-{$HERMES_HOSTNAME} {
-    import service_tls
-    reverse_proxy hermes:9119
-}
-
-# Hermes Agent OpenAI-compatible API - every API request must send
-# 'Authorization: Bearer <HERMES_API_SERVER_KEY>' (enforced by Hermes, /health
-# excepted; the API server refuses to start without a key)
-{$HERMES_API_HOSTNAME} {
-    import service_tls
-    reverse_proxy hermes:8642
-}
-
 # LightRAG (Graph-based RAG with Knowledge Extraction)
 {$LIGHTRAG_HOSTNAME} {
     import service_tls

@@ -1,0 +1,20 @@
+# GPU pinning override for InvokeAI (NVIDIA only).
+#
+# This file is included automatically by the stack's scripts when
+# INVOKEAI_GPU_DEVICES is set to a non-empty value in .env
+# (and the invokeai-nvidia profile is active) (for example
+# INVOKEAI_GPU_DEVICES=0). It replaces the count-based GPU reservation of the
+# invokeai-nvidia service with an explicit list of GPU device IDs, so InvokeAI
+# only sees the listed GPUs. When INVOKEAI_GPU_DEVICES is empty, this file is
+# not used and INVOKEAI_GPU_COUNT keeps working as before.
+#
+# Requires Docker Compose v2.24.4+ (for the !override tag).
+services:
+  invokeai-nvidia:
+    deploy:
+      resources:
+        reservations:
+          devices: !override
+            - driver: nvidia
+              device_ids: ["${INVOKEAI_GPU_DEVICES:?set INVOKEAI_GPU_DEVICES in .env, e.g. 0}"]
+              capabilities: [gpu]

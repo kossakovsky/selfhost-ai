@@ -83,6 +83,9 @@ log_success "Service configuration completed."
 cleanup_legacy_n8n_workers
 cleanup_legacy_postgresus
 
+# Clean up services removed from the stack
+cleanup_removed_hermes
+
 # Pull latest versions of selected containers based on updated .env
 set_telemetry_stage "update_docker_pull"
 log_info "Pulling latest versions of selected containers..."

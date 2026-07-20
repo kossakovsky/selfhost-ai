@@ -47,7 +47,6 @@ EMAIL_VARS=(
     "COMFYUI_USERNAME"
     "DASHBOARD_USERNAME"
     "DOCLING_USERNAME"
-    "HERMES_USERNAME"
     "INVOKEAI_USERNAME"
     "LANGFUSE_INIT_USER_EMAIL"
     "LETSENCRYPT_EMAIL"
@@ -80,6 +79,7 @@ declare -A VARS_TO_GENERATE=(
     ["APPSMITH_ENCRYPTION_SALT"]="password:32"
     ["CLICKHOUSE_PASSWORD"]="password:32"
     ["COMFYUI_PASSWORD"]="password:32" # Added ComfyUI basic auth password
+    ["CRAWL4AI_API_TOKEN"]="secret:48" # Bearer token; Crawl4AI 0.9+ binds loopback only without it
     ["DASHBOARD_PASSWORD"]="password:32" # Supabase Dashboard
     ["DIFY_SECRET_KEY"]="secret:64" # Dify application secret key (maps to SECRET_KEY in Dify)
     ["DOCLING_PASSWORD"]="password:32"
@@ -87,9 +87,6 @@ declare -A VARS_TO_GENERATE=(
     ["GOST_PASSWORD"]="password:32"
     ["GOST_USERNAME"]="fixed:gost"
     ["GRAFANA_ADMIN_PASSWORD"]="password:32"
-    ["HERMES_API_SERVER_KEY"]="secret:48" # Bearer token for Hermes OpenAI-compatible API
-    ["HERMES_DASHBOARD_SECRET"]="secret:64" # Session secret for Hermes dashboard basic auth
-    ["HERMES_PASSWORD"]="password:32" # Hermes dashboard basic auth password
     ["INVOKEAI_PASSWORD"]="password:32" # InvokeAI Caddy basic auth password
     ["JWT_SECRET"]="base64:64" # 48 bytes -> 64 chars
     ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"]="langfuse_pk:32"
@@ -144,6 +141,8 @@ if [ -f "$OUTPUT_FILE" ]; then
     log_info "Found existing $OUTPUT_FILE. Reading its values to use as defaults and preserve current settings."
     while IFS= read -r line || [[ -n "$line" ]]; do
         if [[ -n "$line" && ! "$line" =~ ^\s*# && "$line" == *"="* ]]; then
+            # load_env sources .env, so "export FOO=bar" lines are valid - keep them
+            line="${line#export }"
             varName=$(echo "$line" | cut -d'=' -f1 | xargs)
             varValue=$(echo "$line" | cut -d'=' -f2-)
             # Repeatedly unquote "value" or 'value' to get the bare value
@@ -251,6 +250,8 @@ log_info "Generating secrets and creating .env file..."
 
 # Function to update or add a variable to the .env file
 # Usage: _update_or_add_env_var "VAR_NAME" "var_value"
+# An empty var_value removes the line from .env entirely (the preserve block
+# above relies on running before calls that do this).
 _update_or_add_env_var() {
     local var_name="$1"
     local var_value="$2"
@@ -541,6 +542,47 @@ for key in "${!generated_values[@]}"; do
     # Clean up
     rm -f "$value_file"
 done
+
+# --- Preserve variables not present in the template ---
+# Variables that exist in the current .env but were not written by the template
+# pass above (custom user variables, uncommented opt-ins like SCARF_ANALYTICS,
+# INSTALLATION_ID from telemetry.sh) would otherwise be silently dropped.
+# Variables of services removed from the stack (e.g. HERMES_*) also land here
+# and stay until the user deletes them.
+# Append them under a marked section. The whole .env was regenerated from the
+# template above, so the previous run's section is already gone and repeated
+# updates never duplicate entries. This block must run before the WAHA/GOST/hash
+# blocks below: they intentionally remove some variables (e.g. GOST_PROXY_URL
+# when the gost profile is disabled), and running after them would re-append
+# the removed values.
+preserved_header_written=0
+while IFS= read -r varName; do
+    # Only preserve valid variable names, and say so - silently dropping a
+    # variable is the exact bug this block exists to fix
+    if ! [[ "$varName" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+        log_warning "Not preserving .env line with unsupported variable name: '$varName' (re-add it manually if needed)"
+        continue
+    fi
+    if ! grep -q "^${varName}=" "$OUTPUT_FILE"; then
+        if [[ $preserved_header_written -eq 0 ]]; then
+            {
+                echo ""
+                echo "# --- Preserved user variables (not in template) ---"
+                echo "# Note: the installer also re-appends its own managed variables below this line"
+            } >> "$OUTPUT_FILE"
+            preserved_header_written=1
+        fi
+        varValue="${existing_env_vars[$varName]}"
+        # Use single quotes for values containing $ (like bcrypt hashes) to
+        # prevent variable expansion, same as _update_or_add_env_var
+        if [[ "$varValue" == *'$'* ]]; then
+            echo "${varName}='${varValue//\'/\'\\\'\'}'" >> "$OUTPUT_FILE"
+        else
+            echo "${varName}=\"${varValue//\"/\\\"}\"" >> "$OUTPUT_FILE"
+        fi
+        log_info "Preserved variable not present in template: $varName"
+    fi
+done < <(printf '%s\n' "${!existing_env_vars[@]}" | sort)
 
 # --- WAHA API KEY (sha512) --- ensure after .env write/substitutions ---
 # Generate plaintext API key if missing, then compute sha512:HEX and store in WAHA_API_KEY
