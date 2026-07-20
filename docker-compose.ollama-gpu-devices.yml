@@ -1,0 +1,19 @@
+# GPU pinning override for Ollama (NVIDIA only).
+#
+# This file is included automatically by the stack's scripts when
+# OLLAMA_GPU_DEVICES is set to a non-empty value in .env (for example
+# OLLAMA_GPU_DEVICES=1,2). It replaces the count-based GPU reservation of the
+# ollama-gpu service with an explicit list of GPU device IDs, so Ollama only
+# sees the listed GPUs. When OLLAMA_GPU_DEVICES is empty, this file is not
+# used and OLLAMA_GPU_COUNT keeps working as before.
+#
+# Requires Docker Compose v2.24.4+ (for the !override tag).
+services:
+  ollama-gpu:
+    deploy:
+      resources:
+        reservations:
+          devices: !override
+            - driver: nvidia
+              device_ids: ["${OLLAMA_GPU_DEVICES:?set OLLAMA_GPU_DEVICES in .env, e.g. 1,2}"]
+              capabilities: [gpu]

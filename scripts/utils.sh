@@ -330,6 +330,30 @@ get_n8n_workers_compose() {
     return 1
 }
 
+# Get Ollama GPU pinning compose file path if the gpu-nvidia profile is active
+# and OLLAMA_GPU_DEVICES has a non-empty value (requires load_env first)
+# Usage: path=$(get_ollama_gpu_devices_compose) && COMPOSE_FILES+=("-f" "$path")
+get_ollama_gpu_devices_compose() {
+    local compose_file="$PROJECT_ROOT/docker-compose.ollama-gpu-devices.yml"
+    if [ -f "$compose_file" ] && is_profile_active "gpu-nvidia" && [ -n "${OLLAMA_GPU_DEVICES:-}" ]; then
+        echo "$compose_file"
+        return 0
+    fi
+    return 1
+}
+
+# Get InvokeAI GPU pinning compose file path if the invokeai-nvidia profile is
+# active and INVOKEAI_GPU_DEVICES has a non-empty value (requires load_env first)
+# Usage: path=$(get_invokeai_gpu_devices_compose) && COMPOSE_FILES+=("-f" "$path")
+get_invokeai_gpu_devices_compose() {
+    local compose_file="$PROJECT_ROOT/docker-compose.invokeai-gpu-devices.yml"
+    if [ -f "$compose_file" ] && is_profile_active "invokeai-nvidia" && [ -n "${INVOKEAI_GPU_DEVICES:-}" ]; then
+        echo "$compose_file"
+        return 0
+    fi
+    return 1
+}
+
 # Get Supabase compose file path if profile is active and file exists
 # Usage: path=$(get_supabase_compose) && COMPOSE_FILES+=("-f" "$path")
 get_supabase_compose() {
@@ -363,6 +387,16 @@ build_compose_files_array() {
     local path
     if path=$(get_n8n_workers_compose); then
         COMPOSE_FILES+=("-f" "$path")
+    fi
+    if path=$(get_ollama_gpu_devices_compose); then
+        COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${OLLAMA_GPU_DEVICES:-}" ]; then
+        log_warning "OLLAMA_GPU_DEVICES is set but GPU pinning is NOT applied (requires the gpu-nvidia profile and docker-compose.ollama-gpu-devices.yml)"
+    fi
+    if path=$(get_invokeai_gpu_devices_compose); then
+        COMPOSE_FILES+=("-f" "$path")
+    elif [ -n "${INVOKEAI_GPU_DEVICES:-}" ]; then
+        log_warning "INVOKEAI_GPU_DEVICES is set but GPU pinning is NOT applied (requires the invokeai-nvidia profile and docker-compose.invokeai-gpu-devices.yml)"
     fi
     if path=$(get_supabase_compose); then
         COMPOSE_FILES+=("-f" "$path")
