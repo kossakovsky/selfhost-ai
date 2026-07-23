@@ -115,10 +115,12 @@ x-ollama: &service-ollama
   container_name: ollama
   restart: unless-stopped
   environment:
-    OLLAMA_CONTEXT_LENGTH: 8192
+    OLLAMA_CONTEXT_LENGTH: "${OLLAMA_CONTEXT_LENGTH:-8192}"
     OLLAMA_FLASH_ATTENTION: 1
-    OLLAMA_KV_CACHE_TYPE: q8_0
-    OLLAMA_MAX_LOADED_MODELS: 2
+    OLLAMA_GPU_OVERHEAD: "${OLLAMA_GPU_OVERHEAD:-0}"
+    OLLAMA_KV_CACHE_TYPE: "${OLLAMA_KV_CACHE_TYPE:-q8_0}"
+    OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-2}"
+    OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL:-}"
   volumes:
     - ollama_storage:/root/.ollama
 
@@ -349,6 +351,8 @@ services:
       - "443:443"
       - "7687:7687"
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./caddy-addon:/etc/caddy/addons:ro

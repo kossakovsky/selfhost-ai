@@ -92,6 +92,29 @@ Example: `caddy-addon/site-custom-headers.conf`
 }
 ```
 
+Example: expose a service that runs outside this stack (e.g. on the host or another machine). Because these files are gitignored, the entry survives `make update` — no need to re-add it after upgrades.
+
+`caddy-addon/site-myapp.conf`
+```caddy
+myapp.yourdomain.com {
+    import service_tls
+    # host.docker.internal reaches the host machine from inside the Caddy container
+    reverse_proxy host.docker.internal:3000
+}
+```
+
+For a service on the host machine, two more things are needed. First, find the subnet and gateway of this stack's Docker network:
+
+```bash
+docker network inspect localai_default --format '{{range .IPAM.Config}}{{.Subnet}} (gateway {{.Gateway}}){{end}}'
+```
+
+1. The service must listen on an address the Caddy container can reach — not only `127.0.0.1`. Prefer the gateway IP from the command above over `0.0.0.0`, which would expose the service on every host interface and bypass Caddy if the firewall ever changes.
+2. The installer's firewall (UFW) blocks container-to-host traffic by default. Allow the port for the subnet from the command above, e.g.:
+   ```bash
+   sudo ufw allow from 172.18.0.0/16 to any port 3000
+   ```
+
 ## Important Notes
 
 - `tls-snippet.conf.example` is tracked in git (template with default Let's Encrypt behavior)

@@ -296,6 +296,14 @@ This script will:
 4.  Ask if you want to re-run the n8n workflow import (useful if you skipped this during the initial installation or want to refresh the community workflows).
 5.  Restart all services with the new updates.
 
+### Custom Configuration That Survives Updates
+
+`make update` resets tracked files (like `Caddyfile` and `docker-compose.yml`) to the latest version, so never edit them directly. Instead, use the dedicated extension points — the files you create there are gitignored, so they are preserved across updates:
+
+- **Custom Caddy entries** (e.g. reverse proxy for a service running outside this stack): drop a `site-*.conf` file into `caddy-addon/`. It is imported automatically by the main Caddyfile. See [caddy-addon/README.md](caddy-addon/README.md) for examples.
+- **Docker Compose overrides** (change any service property): create a `docker-compose.override.yml` in the project root. It is picked up automatically with the highest precedence.
+- **Settings**: values you set in `.env` are preserved by the updater (except `GOST_NO_PROXY`, which is regenerated so it always covers newly added services).
+
 ## Cleaning up Docker
 
 If you need to free up disk space, you can run the Docker cleanup command. This removes all unused Docker containers, images, and volumes.

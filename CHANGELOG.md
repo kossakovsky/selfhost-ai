@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-07-23
+
+### Added
+- **Ollama** - Runtime tuning via `.env`: `OLLAMA_MAX_LOADED_MODELS`, `OLLAMA_NUM_PARALLEL`, `OLLAMA_GPU_OVERHEAD` (in bytes), `OLLAMA_CONTEXT_LENGTH` and `OLLAMA_KV_CACHE_TYPE` were hardcoded (or unavailable) in `docker-compose.yml` and are now configurable, so multi-GPU hosts can keep more models resident and reserve VRAM for other tools sharing a GPU. The previously hardcoded values stay as the stack's defaults, and the two new variables are unset/zero by default so Ollama's stock behavior applies — existing installs are unaffected (#99).
+- **Caddy** - `host.docker.internal` now resolves from the Caddy container (via `extra_hosts: host-gateway`), so custom `caddy-addon/site-*.conf` entries can reverse-proxy services running on the host machine.
+
+### Changed
+- **Docs** - README now documents the update-safe extension points (`caddy-addon/site-*.conf`, `docker-compose.override.yml`, `.env`), and `caddy-addon/README.md` gained a reverse-proxy example for stack-external services. The persistent-Caddy-entries mechanism requested in #100 already existed but was easy to miss (#100).
+
 ## [1.8.0] - 2026-07-20
 
 ### Added
