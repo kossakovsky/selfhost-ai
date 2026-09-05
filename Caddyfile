@@ -136,6 +136,12 @@ import /etc/caddy/addons/tls-snippet.conf
     reverse_proxy portainer:9000
 }
 
+# LinkedGrow
+{$LINKEDGROW_HOSTNAME} {
+    import service_tls
+    reverse_proxy linkedgrow:3000
+}
+
 # Postiz
 {$POSTIZ_HOSTNAME} {
     import service_tls

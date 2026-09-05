@@ -122,6 +122,7 @@ After DNS is configured, go to **Cloudflare One Dashboard** → **Networks** →
 | **Letta**          | letta.yourdomain.com          | `http://letta:8283`          | No auth             |
 | **LibreTranslate** | libretranslate.yourdomain.com | `http://libretranslate:5000` | ⚠️ Loses Caddy auth  |
 | **LightRAG**       | lightrag.yourdomain.com       | `http://lightrag:9621`       | No auth             |
+| **LinkedGrow**     | linkedgrow.yourdomain.com     | `http://linkedgrow:3000`     | Built-in login      |
 | **Neo4j**          | neo4j.yourdomain.com          | `http://neo4j:7474`          | Built-in login      |
 | **NocoDB**         | nocodb.yourdomain.com         | `http://nocodb:8080`         | Built-in login      |
 | **Open WebUI**     | webui.yourdomain.com          | `http://open-webui:8080`     | Built-in login      |

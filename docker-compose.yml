@@ -16,6 +16,10 @@ volumes:
   libretranslate_models:
   lightrag_data:
   lightrag_inputs:
+  linkedgrow_config:
+  linkedgrow_db_data:
+  linkedgrow_profiles:
+  linkedgrow_uploads:
   n8n_storage:
   nocodb_data:
   ollama_storage:
@@ -1137,6 +1141,71 @@ services:
       - libretranslate_models:/home/libretranslate/.local:rw
     healthcheck:
       test: ["CMD-SHELL", "./venv/bin/python scripts/healthcheck.py"]
+
+  linkedgrow:
+    image: ghcr.io/digihold/linkedgrow:${LINKEDGROW_VERSION:-latest}
+    container_name: linkedgrow
+    profiles: ["linkedgrow"]
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      APP_URL: "${LINKEDGROW_HOSTNAME:+https://}${LINKEDGROW_HOSTNAME}"
+      AUTH_SECRET: "${LINKEDGROW_AUTH_SECRET}"
+      # Must stay the value the credentials were stored with. A different one
+      # makes every saved LinkedIn password, 2FA secret and AI key unreadable.
+      ENCRYPTION_KEY: "${LINKEDGROW_ENCRYPTION_KEY}"
+      LINKEDGROW_EDITION: self-hosted
+      TURSO_AUTH_TOKEN: ""
+      TURSO_DATABASE_URL: http://linkedgrow-db:8080
+    volumes:
+      - linkedgrow_config:/data/config
+      - linkedgrow_uploads:/data/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+    depends_on:
+      - linkedgrow-db
+
+  # Drives one real Chrome per connected LinkedIn account under Xvfb, which is
+  # why it wants shared memory and why WORKER_SLOTS is the memory dial: 2 slots
+  # fit 4 GB, 12 need 16 GB.
+  linkedgrow-worker:
+    image: ghcr.io/digihold/linkedgrow-worker:${LINKEDGROW_VERSION:-latest}
+    container_name: linkedgrow-worker
+    profiles: ["linkedgrow"]
+    restart: unless-stopped
+    logging: *default-logging
+    shm_size: "2gb"
+    environment:
+      APP_INTERNAL_URL: http://linkedgrow:3000
+      ENCRYPTION_KEY: "${LINKEDGROW_ENCRYPTION_KEY}"
+      LINKEDGROW_EDITION: self-hosted
+      TURSO_AUTH_TOKEN: ""
+      TURSO_DATABASE_URL: http://linkedgrow-db:8080
+      WORKER_ENV: production
+      WORKER_SLOTS: "${LINKEDGROW_WORKER_SLOTS:-2}"
+    volumes:
+      - linkedgrow_config:/data/config:ro
+      - linkedgrow_profiles:/data/profiles
+      - linkedgrow_uploads:/data/uploads
+    depends_on:
+      linkedgrow:
+        condition: service_healthy
+
+  linkedgrow-db:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    container_name: linkedgrow-db
+    profiles: ["linkedgrow"]
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SQLD_DB_PATH: /var/lib/sqld/iku.db
+      SQLD_NODE: primary
+    volumes:
+      - linkedgrow_db_data:/var/lib/sqld
 
   python-runner:
     image: python:3.11-slim

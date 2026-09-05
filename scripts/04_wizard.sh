@@ -53,6 +53,7 @@ base_services_data=(
     "letta" "Letta (Agent Server & SDK)"
     "libretranslate" "LibreTranslate (Self-hosted translation API - 50+ languages)"
     "lightrag" "LightRAG (Graph-based RAG with knowledge graphs)"
+    "linkedgrow" "LinkedGrow (LinkedIn lead generation agents in a real browser)"
     "monitoring" "Monitoring Suite (Prometheus, Grafana, cAdvisor, Node-Exporter)"
     "n8n" "n8n, n8n-worker, n8n-import (Workflow Automation)"
     "n8n-mcp" "n8n-MCP (MCP server: n8n node docs + workflow tools for AI IDEs)"

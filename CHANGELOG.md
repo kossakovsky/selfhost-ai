@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- **LinkedGrow** - New optional service (`linkedgrow` profile): open source AI agents that find leads and clients on LinkedIn, served at `linkedgrow.<domain>`. You describe who you sell to, and an agent scores each profile it finds, sends the invitation, runs the follow up conversation and hands over the people who reply; the posting side (generator, editor, calendar and the analytics read back off your own posts) comes with it. Three containers under one profile: the app, a `linkedgrow-db` libSQL server, and a worker that drives one real Chrome per connected account under Xvfb, because LinkedIn has no API for reading a feed or sending a message. The worker is the memory cost here: `LINKEDGROW_WORKER_SLOTS` (default 2) caps concurrent browsers, 2 fit 4 GB of RAM and 12 need 16 GB, and it gets `shm_size: 2gb` so Chrome does not die on a full `/dev/shm`. It brings its own database rather than joining the shared PostgreSQL, which is the only backend it supports. `LINKEDGROW_AUTH_SECRET` and `LINKEDGROW_ENCRYPTION_KEY` are generated into `.env` on install and passed in, so both live with the rest of the stack's secrets instead of inside a container volume; `LINKEDGROW_ENCRYPTION_KEY` must stay the value the credentials were stored with, because a new one makes every saved LinkedIn password, 2FA secret and AI key permanently unreadable, and the app refuses to boot on a key that is not 64 hex characters. The first account created owns the instance and signups close after it, then the setup wizard asks for an AI key from Anthropic, OpenAI, Google, xAI or Moonshot. Agent AI runs on that key, and the agents cannot be pointed at Ollama or any other local endpoint, because the client has no configurable base URL.
+
 ## [1.10.1] - 2026-09-02
 
 ### Fixed

@@ -327,6 +327,20 @@ if is_profile_active "docling"; then
     }")
 fi
 
+# LinkedGrow
+if is_profile_active "linkedgrow"; then
+    SERVICES_ARRAY+=("    \"linkedgrow\": {
+      \"hostname\": \"$(json_escape "$LINKEDGROW_HOSTNAME")\",
+      \"credentials\": {
+        \"note\": \"First account created owns the instance, then signups close\"
+      },
+      \"extra\": {
+        \"internal_api\": \"http://linkedgrow:3000\",
+        \"docs\": \"https://github.com/DigiHold/LinkedGrow\"
+      }
+    }")
+fi
+
 # PaddleOCR
 if is_profile_active "paddleocr"; then
     SERVICES_ARRAY+=("    \"paddleocr\": {

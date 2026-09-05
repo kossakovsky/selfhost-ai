@@ -88,6 +88,8 @@ The installer also makes the following powerful open-source tools **available fo
 
 ✅ [**LibreTranslate**](https://docs.libretranslate.com/) - Self-hosted translation API (50+ languages).
 
+✅ [**LinkedGrow**](https://github.com/DigiHold/LinkedGrow) - Open source AI agents that find leads and clients on LinkedIn. You describe who you sell to, and an agent scores each profile, sends the invitation and runs the follow up conversation, then hands over the people who reply. There is no LinkedIn API for any of this, so a real Chrome runs per connected account under Xvfb in the worker container, which is why it wants more memory than most services here. The posting side comes with it, including the scheduler and the analytics it reads back off your own posts.
+
 ✅ [**Neo4j**](https://neo4j.com/) - A graph database management system that allows you to model, store, and query data as a network of nodes and relationships.
 
 ✅ [**NocoDB**](https://nocodb.com/) - An open source Airtable alternative that turns any database into a smart spreadsheet with a no-code interface for building collaborative apps.
@@ -200,6 +202,7 @@ After successful installation, your services are up and running! Here's how to g
     - **Letta:** `letta.yourdomain.com`
     - **LibreTranslate:** `translate.yourdomain.com`
     - **LightRAG:** `lightrag.yourdomain.com`
+    - **LinkedGrow:** `linkedgrow.yourdomain.com` (The first account created owns the instance and signups then close; the setup wizard asks for an AI key)
     - **Neo4j:** `neo4j.yourdomain.com`
     - **NocoDB:** `nocodb.yourdomain.com`
     - **Ollama:** `ollama.yourdomain.com` (Optional local-LLM API; every request must send `Authorization: Bearer <OLLAMA_CADDY_API_TOKEN>`. A leaked token grants full control — including pulling/deleting models — not just inference.)

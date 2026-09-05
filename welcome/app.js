@@ -348,6 +348,14 @@
             category: 'tools',
             docsUrl: 'https://docling-project.github.io/docling'
         },
+        'linkedgrow': {
+            name: 'LinkedGrow',
+            description: 'LinkedIn Lead Agents',
+            icon: 'LG',
+            color: 'bg-[#0A66C2]',
+            category: 'automation',
+            docsUrl: 'https://github.com/DigiHold/LinkedGrow'
+        },
         'paddleocr': {
             name: 'PaddleOCR',
             description: 'OCR API Server',
