@@ -202,7 +202,7 @@ After successful installation, your services are up and running! Here's how to g
     - **Letta:** `letta.yourdomain.com`
     - **LibreTranslate:** `translate.yourdomain.com`
     - **LightRAG:** `lightrag.yourdomain.com`
-    - **LinkedGrow:** `linkedgrow.yourdomain.com` (The first account created owns the instance and signups then close; the setup wizard asks for an AI key)
+    - **LinkedGrow:** `linkedgrow.yourdomain.com` (Sign up immediately after install: the first account becomes the administrator, and sign ups only close once the setup wizard finishes)
     - **Neo4j:** `neo4j.yourdomain.com`
     - **NocoDB:** `nocodb.yourdomain.com`
     - **Ollama:** `ollama.yourdomain.com` (Optional local-LLM API; every request must send `Authorization: Bearer <OLLAMA_CADDY_API_TOKEN>`. A leaked token grants full control — including pulling/deleting models — not just inference.)

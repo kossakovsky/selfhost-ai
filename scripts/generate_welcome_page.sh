@@ -332,7 +332,7 @@ if is_profile_active "linkedgrow"; then
     SERVICES_ARRAY+=("    \"linkedgrow\": {
       \"hostname\": \"$(json_escape "$LINKEDGROW_HOSTNAME")\",
       \"credentials\": {
-        \"note\": \"First account created owns the instance, then signups close\"
+        \"note\": \"Sign up first: that account becomes the administrator\"
       },
       \"extra\": {
         \"internal_api\": \"http://linkedgrow:3000\",

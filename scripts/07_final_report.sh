@@ -142,7 +142,8 @@ if is_profile_active "postiz"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Postiz${NC}: Create your account on first login"
 fi
 if is_profile_active "linkedgrow"; then
-    echo -e "     ${GREEN}*${NC} ${WHITE}LinkedGrow${NC}: First account owns the instance, then the setup wizard asks for an AI key"
+    echo -e "     ${GREEN}*${NC} ${WHITE}LinkedGrow${NC}: Sign up now, before anyone else can - the first account becomes the administrator"
+    echo -e "       and sign ups only close once you finish the setup wizard, which asks for an AI key"
 fi
 if is_profile_active "uptime-kuma"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Uptime Kuma${NC}: Create your account on first login"
