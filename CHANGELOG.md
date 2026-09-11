@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-09-11
+
+### Added
+- **Open Terminal** - New optional `open-terminal` profile (requires `open-webui`) that adds [Open Terminal](https://github.com/open-webui/open-terminal), an execution environment for Open WebUI agents: a Linux shell with a persistent home, runtime apt/pip/npm installs, local services with port proxying and Jupyter kernels, so an agent can produce an artifact instead of describing how to. Internal only (`http://open-terminal:8000`, no Caddy route); the admin connects it once under Admin Settings → Integrations → Open Terminal with the generated `OPEN_TERMINAL_API_KEY`, and grants access to users or groups there. Multi-user mode is on by default (one unprivileged Linux account per Open WebUI user, volume on `/home`; the installer refuses a `slim`/`alpine`/`openshift` tag in that mode because those images ignore it), CPU/memory limits are tunable via `OPEN_TERMINAL_CPU_LIMIT` / `OPEN_TERMINAL_MEMORY_LIMIT`. Egress filtering is left to `docker-compose.override.yml` because the image reads an empty `OPEN_TERMINAL_ALLOWED_DOMAINS` as "block everything" and needs `NET_ADMIN`. (#117)
+
 ## [1.11.0] - 2026-09-09
 
 ### Added

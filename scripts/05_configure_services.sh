@@ -197,6 +197,25 @@ else
     write_env_var "N8N_INSTANCE_AI_SANDBOX_ENABLED" "false"
 fi
 
+# Open Terminal: only the full image ("latest" or a release tag such as 0.12.5)
+# honours OPEN_TERMINAL_MULTI_USER and the package lists; the slim / alpine /
+# openshift variants ("slim", "latest-slim", "0.12.5-alpine", ...) ignore them.
+# Refuse the combination instead of letting every user silently share one shell.
+if is_profile_active "open-terminal"; then
+    OT_VERSION="$(read_env_var OPEN_TERMINAL_VERSION)"
+    case "$OT_VERSION" in
+        slim|alpine|openshift|*-slim|*-alpine|*-openshift)
+            if [ "$(read_env_var OPEN_TERMINAL_MULTI_USER)" = "true" ]; then
+                log_error "OPEN_TERMINAL_VERSION=$OT_VERSION does not support OPEN_TERMINAL_MULTI_USER=true - all users would share one shell. Use the full image (latest or a release tag) or set OPEN_TERMINAL_MULTI_USER=false."
+                exit 1
+            fi
+            for v in OPEN_TERMINAL_PACKAGES OPEN_TERMINAL_PIP_PACKAGES OPEN_TERMINAL_NPM_PACKAGES; do
+                [ -z "$(read_env_var "$v")" ] || log_warning "$v is ignored by the '$OT_VERSION' image (no runtime installs)."
+            done
+            ;;
+    esac
+fi
+
 # Web search for the n8n Assistant: point n8n at the bundled SearXNG while that
 # profile is active, and clear the value again when it is not. A custom URL is
 # left alone in both directions.

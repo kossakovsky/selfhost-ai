@@ -412,6 +412,21 @@ if is_profile_active "n8n-mcp"; then
     }")
 fi
 
+# Open Terminal (internal only, driven from Open WebUI)
+if is_profile_active "open-terminal"; then
+    SERVICES_ARRAY+=("    \"open-terminal\": {
+      \"hostname\": null,
+      \"credentials\": {
+        \"api_key\": \"$(json_escape "$OPEN_TERMINAL_API_KEY")\"
+      },
+      \"extra\": {
+        \"internal_api\": \"http://open-terminal:8000\",
+        \"recommendation\": \"Open WebUI: Admin Settings > Integrations > Open Terminal - add this URL and API key, then grant access to users or groups\",
+        \"docs\": \"https://docs.openwebui.com/features/open-terminal/\"
+      }
+    }")
+fi
+
 # Crawl4AI (internal only)
 if is_profile_active "crawl4ai"; then
     SERVICES_ARRAY+=("    \"crawl4ai\": {
