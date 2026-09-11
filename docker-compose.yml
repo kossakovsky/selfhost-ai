@@ -22,6 +22,7 @@ volumes:
   nocodb_data:
   ollama_storage:
   open-webui:
+  open_terminal_home:
   paddle_cache:
   paddleocr_cache:
   paddlex_data:
@@ -215,6 +216,53 @@ services:
     volumes:
       - ~/.flowise:/root/.flowise
     entrypoint: /bin/sh -c "sleep 3; flowise start"
+
+  # ---------------------------------------------------------------------------
+  # Open Terminal (profile "open-terminal") - execution environment for Open WebUI
+  # agents: shell, filesystem, runtime package installs. Internal only: no ports,
+  # no Caddy block. Open WebUI reaches it as http://open-terminal:8000; the admin
+  # adds it under Admin Settings > Integrations > Open Terminal, so the key stays
+  # server-side. Only the full image ("latest" or a release tag) supports
+  # multi-user and runtime installs; the slim/alpine/openshift variants do
+  # neither, and 05_configure_services.sh refuses them in multi-user mode.
+  # Multi-user creates a plain Linux
+  # account (no sudo) per Open WebUI user id, hence the volume is /home, not
+  # /home/user; with multi-user off the chat gets the image's sudo-capable user.
+  # Never mount docker.sock here: the entrypoint would hand the agent's shell the
+  # host Docker daemon. OPEN_TERMINAL_ALLOWED_DOMAINS is deliberately absent: the
+  # entrypoint reads a set-but-empty value as "block all egress" and needs
+  # NET_ADMIN for iptables, so an interpolated default would crash the container.
+  # Add it together with cap_add NET_ADMIN in docker-compose.override.yml if wanted.
+  # ---------------------------------------------------------------------------
+  open-terminal:
+    image: "ghcr.io/open-webui/open-terminal:${OPEN_TERMINAL_VERSION:-latest}"
+    container_name: open-terminal
+    profiles: ["open-terminal"]
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      <<: *proxy-env
+      OPEN_TERMINAL_API_KEY: "${OPEN_TERMINAL_API_KEY}"
+      OPEN_TERMINAL_MULTI_USER: "${OPEN_TERMINAL_MULTI_USER:-true}"
+      # Reinstalled on every container start. In multi-user mode this is the only
+      # way to add apt packages (per-user accounts have no sudo).
+      OPEN_TERMINAL_PACKAGES: "${OPEN_TERMINAL_PACKAGES:-}"
+      OPEN_TERMINAL_PIP_PACKAGES: "${OPEN_TERMINAL_PIP_PACKAGES:-}"
+      OPEN_TERMINAL_NPM_PACKAGES: "${OPEN_TERMINAL_NPM_PACKAGES:-}"
+    volumes:
+      - open_terminal_home:/home
+    # Safety valve against a runaway build or a stuck port proxy, not a quota.
+    deploy:
+      resources:
+        limits:
+          cpus: "${OPEN_TERMINAL_CPU_LIMIT:-2.0}"
+          memory: "${OPEN_TERMINAL_MEMORY_LIMIT:-2G}"
+    healthcheck:
+      test: ["CMD-SHELL", "http_proxy= https_proxy= HTTP_PROXY= HTTPS_PROXY= curl -fs http://localhost:8000/docs || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:main

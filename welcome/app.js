@@ -188,6 +188,14 @@
             category: 'ai',
             docsUrl: 'https://docs.flowiseai.com'
         },
+        'open-terminal': {
+            name: 'Open Terminal',
+            description: 'Execution sandbox for Open WebUI agents',
+            icon: 'OT',
+            color: 'bg-[#2D333B]',
+            category: 'ai',
+            docsUrl: 'https://docs.openwebui.com/features/open-terminal/'
+        },
         'open-webui': {
             name: 'Open WebUI',
             description: 'ChatGPT-like Interface',

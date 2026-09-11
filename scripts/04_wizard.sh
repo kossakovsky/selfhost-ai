@@ -60,6 +60,7 @@ base_services_data=(
     "neo4j" "Neo4j (Graph Database)"
     "nocodb" "NocoDB (Open Source Airtable Alternative - Spreadsheet Database)"
     "ollama" "Ollama (Local LLM Runner - select hardware in next step)"
+    "open-terminal" "Open Terminal (execution sandbox for Open WebUI agents; multi-user, ~4 GB image)"
     "open-webui" "Open WebUI (ChatGPT-like Interface)"
     "paddleocr" "PaddleOCR (OCR API Server)"
     "portainer" "Portainer (Docker management UI)"
@@ -160,6 +161,17 @@ if printf '%s\n' "${selected_profiles[@]}" | grep -qx "n8n-sandbox" && \
     done
     selected_profiles=("${tmp[@]}")
     log_warning "The n8n Assistant sandbox requires n8n. n8n-sandbox has been removed from selection."
+fi
+
+# Open Terminal is driven from Open WebUI (Admin Settings > Integrations)
+if printf '%s\n' "${selected_profiles[@]}" | grep -qx "open-terminal" && \
+   ! printf '%s\n' "${selected_profiles[@]}" | grep -qx "open-webui"; then
+    tmp=()
+    for p in "${selected_profiles[@]}"; do
+        [ "$p" = "open-terminal" ] || tmp+=("$p")
+    done
+    selected_profiles=("${tmp[@]}")
+    log_warning "Open Terminal requires Open WebUI. open-terminal has been removed from selection."
 fi
 
 # Enforce mutual exclusivity between Dify and Supabase (compact)

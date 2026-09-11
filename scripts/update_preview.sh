@@ -108,6 +108,11 @@ if is_profile_active "open-webui"; then
     check_image_update "open-webui" "ghcr.io/open-webui/open-webui:main"
 fi
 
+if is_profile_active "open-terminal"; then
+    log_subheader "Open Terminal"
+    check_image_update "open-terminal" "ghcr.io/open-webui/open-terminal:${OPEN_TERMINAL_VERSION:-latest}"
+fi
+
 if is_profile_active "portainer"; then
     log_subheader "Portainer"
     check_image_update "portainer" "portainer/portainer-ce:latest"

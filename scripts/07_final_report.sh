@@ -168,6 +168,11 @@ if is_profile_active "cpu" || is_profile_active "gpu-nvidia" || is_profile_activ
         echo -e "       http://ollama<N>:11434, sharing one model store. Tune each with OLLAMA<N>_* in .env"
     fi
 fi
+if is_profile_active "open-terminal"; then
+    echo -e "     ${GREEN}*${NC} ${WHITE}Open Terminal${NC}: In Open WebUI open Admin Settings > Integrations > Open Terminal and add"
+    echo -e "       http://open-terminal:8000 with the API key from the Welcome Page. Admin-only until you grant access;"
+    echo -e "       everyone you grant gets a shell in a container on the internal Docker network (treat it like SSH access)"
+fi
 if is_profile_active "crawl4ai"; then
     echo -e "     ${GREEN}*${NC} ${WHITE}Crawl4AI${NC}: Internal API at http://crawl4ai:11235 - requests must send 'Authorization: Bearer <token>' (token on Welcome Page)"
 fi

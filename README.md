@@ -98,6 +98,8 @@ The installer also makes the following powerful open-source tools **available fo
 
 ✅ [**Open WebUI**](https://openwebui.com/) - A user-friendly, ChatGPT-like interface to interact privately with your AI models and n8n agents.
 
+✅ [**Open Terminal**](https://docs.openwebui.com/features/open-terminal/) - Execution sandbox for Open WebUI agents: a real Linux shell with a filesystem, package installs, local services and Jupyter, a separate Linux account per user (internal only, see [below](#open-terminal-execution-sandbox-for-open-webui-agents)).
+
 ✅ [**PaddleOCR**](https://www.paddleocr.ai/latest/en/index.html) - A CPU-ready OCR API powered by PaddleX Basic Serving. 
 
 ✅ [**Portainer**](https://www.portainer.io/) - A lightweight, secure web UI to manage your Docker environment (containers, images, volumes, networks) with ease.
@@ -225,6 +227,17 @@ After successful installation, your services are up and running! Here's how to g
 - **How to enable**: Select “Python Runner” in the Service Selection Wizard during install/update, or add the profile manually: `COMPOSE_PROFILES=...,python-runner`.
 - **Where to put code**: Place your Python files in `python-runner/`. The default entry point is `python-runner/main.py`.
 - **Dependencies**: Add them to `python-runner/requirements.txt`; they will be installed automatically on container start.
+
+### Open Terminal: execution sandbox for Open WebUI agents
+
+Open WebUI can search, read and reason, and its built-in code interpreter runs a snippet of Python, but out of the box it cannot keep files around, install a dependency or start a local service. [Open Terminal](https://docs.openwebui.com/features/open-terminal/) closes that loop: a Linux environment the chat drives, with a shell, a persistent home directory, apt/pip/npm installs at runtime, port proxying for local services and Jupyter kernels. Select **Open Terminal** in the wizard (`open-terminal` profile, requires `open-webui`). Nothing is published and there is no URL; Open WebUI talks to `open-terminal:8000` over the internal network.
+
+- **Connect it once**: in Open WebUI open **Admin Settings → Integrations → Open Terminal** and add `http://open-terminal:8000` with the API key from the Welcome Page (`OPEN_TERMINAL_API_KEY` in `.env`). Add it there, not as a tool server, and not in your personal settings: the admin connection keeps the key on the server, a personal one sends it to the browser.
+- **Access is deliberate**: a new connection is visible to admins only. Grant it to users or groups in the same dialog. Everyone you grant gets a shell inside the container (an unprivileged Linux account in multi-user mode, a sudo-capable one with `OPEN_TERMINAL_MULTI_USER=false`), which sits on the same Docker network as Postgres, Ollama, n8n and the rest, so treat it like giving out SSH access.
+- **Multi-user by default**: `OPEN_TERMINAL_MULTI_USER=true` creates a Linux account per Open WebUI user with its own home under the `localai_open_terminal_home` volume. Files and processes are isolated, the network namespace is not: a local service one user starts on a port is reachable through another user's proxy URL. Set it to `false` for a single shared shell.
+- **Size and limits**: the full image (`latest`, or a release tag such as `0.12.5` via `OPEN_TERMINAL_VERSION`) is about 4 GB and is the only variant that supports multi-user and runtime installs; the installer refuses a `slim`/`alpine`/`openshift` variant while multi-user is on. The container is capped at `OPEN_TERMINAL_CPU_LIMIT=2.0` CPUs and `OPEN_TERMINAL_MEMORY_LIMIT=2G`; raise them in `.env` if the agent needs more.
+- **Preinstalled packages**: `OPEN_TERMINAL_PACKAGES`, `OPEN_TERMINAL_PIP_PACKAGES` and `OPEN_TERMINAL_NPM_PACKAGES` are reinstalled on every container start, so long lists slow startup. In multi-user mode they are the only way to add apt packages, because per-user accounts have no `sudo`; the agent can still `pip install --user` and use project-local npm. With multi-user off the shell has `sudo` and installs anything itself.
+- **Egress filtering** (`OPEN_TERMINAL_ALLOWED_DOMAINS`) is not wired into the stack: the image treats an empty value as "block all outbound traffic" and needs `NET_ADMIN`. If you want it, add the variable together with `cap_add: [NET_ADMIN]` to the `open-terminal` service in `docker-compose.override.yml`.
 
 2.  **Explore n8n:**
 
