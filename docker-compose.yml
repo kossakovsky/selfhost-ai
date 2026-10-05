@@ -752,7 +752,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "7687:7687"
+    # Bolt (7687) is published by docker-compose.neo4j.yml, only while the
+    # neo4j profile is active (issue #134) - do not add it back here.
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -964,20 +965,23 @@ services:
       start_period: 1s
 
   minio:
-    image: quay.io/minio/minio:latest
+    # Silo: maintained MinIO fork with the same data format and MINIO_* vars
+    # (quay.io/minio/minio rejects anonymous pulls). The server binary is
+    # 'silo', with no 'minio' alias. Not the 'distroless' tag: it has no sh/curl.
+    image: docker.io/pgsty/silo:latest
     container_name: minio
     restart: always
     profiles: ["langfuse"]
     entrypoint: sh
     # create the 'langfuse' bucket before starting the service
-    command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    command: -c 'mkdir -p /data/langfuse && silo server --address ":9000" --console-address ":9001" /data'
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
     volumes:
       - langfuse_minio_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/cluster"]
       interval: 1s
       timeout: 5s
       retries: 5
@@ -1602,17 +1606,18 @@ services:
       - ragflow_mysql_data:/var/lib/mysql
 
   ragflow-minio:
-    image: quay.io/minio/minio:latest
+    # Silo (MinIO fork), see the 'minio' service above
+    image: docker.io/pgsty/silo:latest
     container_name: ragflow-minio
     profiles: ["ragflow"]
     restart: unless-stopped
     entrypoint: sh
-    command: -c 'mkdir -p /data/ragflow && minio server --address ":9000" --console-address ":9001" /data'
+    command: -c 'mkdir -p /data/ragflow && silo server --address ":9000" --console-address ":9001" /data'
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: "${RAGFLOW_MINIO_ROOT_PASSWORD}"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/cluster"]
       interval: 5s
       timeout: 5s
       retries: 10

@@ -70,6 +70,23 @@ def get_open_webui_postgres_compose_files():
               f"Restore the file or set OPEN_WEBUI_DATABASE=sqlite in .env.")
     return []
 
+def get_neo4j_compose_files():
+    """Return the Neo4j Bolt port override while the neo4j profile is active.
+
+    It publishes 7687 on caddy; the base file no longer does, so the port is
+    not open on installs without Neo4j (issue #134).
+    """
+    env_values = dotenv_values(".env")
+    profiles = [p.strip() for p in (env_values.get("COMPOSE_PROFILES") or "").split(',')]
+    compose_file = "docker-compose.neo4j.yml"
+    if "neo4j" in profiles:
+        if os.path.exists(compose_file):
+            return [compose_file]
+        print(f"WARNING: the neo4j profile is active but {compose_file} is missing - "
+              f"Bolt (7687) is NOT published, so Neo4j Browser cannot connect. "
+              f"Restore it with: git checkout -- {compose_file}")
+    return []
+
 def get_all_profiles(compose_file):
     """Get all profile names from a docker-compose file."""
     if not os.path.exists(compose_file):
@@ -418,6 +435,10 @@ def stop_existing_containers():
     if os.path.exists(open_webui_pg_compose_path):
         cmd.extend(["-f", open_webui_pg_compose_path])
 
+    neo4j_compose_path = "docker-compose.neo4j.yml"
+    if os.path.exists(neo4j_compose_path):
+        cmd.extend(["-f", neo4j_compose_path])
+
     # Include user overrides if present
     override_path = "docker-compose.override.yml"
     if os.path.exists(override_path):
@@ -491,6 +512,10 @@ def start_local_ai():
     # Include the Open WebUI PostgreSQL override when OPEN_WEBUI_DATABASE=postgres
     for open_webui_compose_path in get_open_webui_postgres_compose_files():
         compose_files.extend(["-f", open_webui_compose_path])
+
+    # Publish the Neo4j Bolt port on caddy only while the neo4j profile is active
+    for neo4j_compose_path in get_neo4j_compose_files():
+        compose_files.extend(["-f", neo4j_compose_path])
 
     # Include user overrides if present (must be last for highest precedence)
     override_path = "docker-compose.override.yml"

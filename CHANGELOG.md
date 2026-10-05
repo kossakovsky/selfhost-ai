@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.16.2] - 2026-10-05
+
+### Fixed
+- **Langfuse / RAGFlow** - `make update` aborted with `401 UNAUTHORIZED` for `quay.io/minio/minio` whenever the `langfuse` or `ragflow` profile was active: that repository no longer allows anonymous pulls (MinIO stopped publishing images), and Docker Hub no longer serves `minio/minio` either. The `minio` and `ragflow-minio` services now run `pgsty/silo`, a maintained MinIO fork (also used by RAGFlow upstream) that keeps the data format, so existing buckets are picked up as they are (issue #135).
+- **Caddy (security)** - Port `7687` (Neo4j Bolt) was published on `0.0.0.0` on every install, also without the `neo4j` profile, and Docker-published ports bypass ufw. It is now published only while `neo4j` is active (`docker-compose.neo4j.yml`); the next `make update` or `make restart` closes it on installs without Neo4j (issue #134).
+
 ## [1.16.1] - 2026-10-02
 
 ### Fixed

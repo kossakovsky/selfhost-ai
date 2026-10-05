@@ -276,6 +276,7 @@ Key functions:
 - `cleanup_legacy_comfyui` - Remove the pre-1.13 `comfyui` container (service renamed to `comfyui-*`, container name kept) so `up` does not hit a name conflict
 - `get_n8n_workers_compose` / `get_supabase_compose` / `get_dify_compose` - Get compose file path if profile active AND file exists
 - `get_ollama_instances_compose` / `get_open_webui_postgres_compose` - Conditional compose overrides (multi-Ollama, Open WebUI on Postgres)
+- `get_neo4j_compose` - `docker-compose.neo4j.yml`, which publishes Bolt `7687` on caddy only while `neo4j` is active. Never put `7687` back into `docker-compose.yml` (Docker-published ports bypass ufw); the overlay is also listed in `restart.sh` and `start_services.py`
 - `harden_supabase_gateway_bind` - Keep the Supabase API gateway bound to loopback (issue #108)
 - `cleanup_stale_ollama_instances` - Remove Ollama instance containers above the configured count
 - `build_compose_files_array` - Build global `COMPOSE_FILES` array with all active compose files (main + external)
@@ -289,6 +290,7 @@ Common profiles:
 - `keelflow`: Keelflow, continuation of Flowise (separate service and `keelflow_data` volume; Flowise data is copied in manually, see `docs/keelflow.md`)
 - `monitoring`: Prometheus, Grafana, cAdvisor, node-exporter
 - `langfuse`: Langfuse observability (includes ClickHouse, MinIO, worker, web)
+- `minio` (langfuse) and `ragflow-minio` (ragflow) run `pgsty/silo`, a MinIO fork with the same data format and `MINIO_*` vars. The server binary is `silo` (no `minio` alias). The healthcheck curls `/minio/health/cluster`, which returns 503 until the server is ready; `/minio/health/live` answers 200 too early
 - `cpu`, `gpu-nvidia`, `gpu-amd`: Ollama hardware profiles (mutually exclusive)
 - `invokeai-nvidia`, `invokeai-amd`, `invokeai-cpu`: InvokeAI hardware profiles (mutually exclusive)
 - `comfyui-nvidia`, `comfyui-amd`, `comfyui-cpu`: ComfyUI hardware profiles (mutually exclusive; the pre-1.13 `comfyui` profile is migrated by the wizard). No `CLI_ARGS` in compose - the images ship the right default and the volume must be `/root`

@@ -275,7 +275,7 @@ https://{$${SERVICE_NAME_UPPER}_HOSTNAME}:7687 {
     reverse_proxy $ARGUMENTS:7687
 }
 ```
-Note: Non-standard ports must be exposed in Caddy's `ports:` section in docker-compose.yml.
+Note: Never add a non-standard port to Caddy's `ports:` in docker-compose.yml - it would be published on every install, and Docker-published ports bypass ufw (issue #134). Publish it from a profile-gated overlay like `docker-compose.neo4j.yml`, wired into a `get_*_compose()` getter in `scripts/utils.sh`, `build_compose_files_array()`, `MAIN_COMPOSE_FILES` in `scripts/restart.sh`, and `start_local_ai()` / `stop_existing_containers()` in `start_services.py`.
 
 ### 2.5 Static File Serving
 

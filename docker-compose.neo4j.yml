@@ -1,0 +1,9 @@
+# Publishes the Neo4j Bolt port on Caddy. Included by the stack's scripts only
+# while the neo4j profile is active: Compose cannot gate a port on a profile,
+# and Docker-published ports bypass ufw (issue #134, docs/security.md).
+# Caddy terminates TLS and proxies WebSocket Bolt (Neo4j Browser) to neo4j:7687;
+# services on the Docker network use bolt://neo4j:7687 directly.
+services:
+  caddy:
+    ports:
+      - "7687:7687"

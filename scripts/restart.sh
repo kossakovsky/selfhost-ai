@@ -13,6 +13,7 @@
 #   - docker-compose.invokeai-gpu-devices.yml (if invokeai-nvidia profile active and INVOKEAI_GPU_DEVICES set)
 #   - docker-compose.comfyui-gpu-devices.yml (if comfyui-nvidia profile active and COMFYUI_GPU_DEVICES set)
 #   - docker-compose.open-webui-postgres.yml (if open-webui profile active and OPEN_WEBUI_DATABASE=postgres)
+#   - docker-compose.neo4j.yml (if exists and neo4j profile active; publishes the Bolt port on caddy)
 #   - supabase/docker/docker-compose.yml (if exists and supabase profile active)
 #   - dify/docker/docker-compose.yaml (if exists and dify profile active)
 #   - docker-compose.override.yml (if exists, user overrides with highest precedence)
@@ -134,6 +135,11 @@ if path=$(get_open_webui_postgres_compose); then
 elif is_profile_active "open-webui" && [ "${OPEN_WEBUI_DATABASE:-}" = "postgres" ]; then
     # build_compose_files_array already logged the full explanation above; only
     # record it here so the closing line cannot claim an unqualified success.
+    DEGRADED=1
+fi
+if path=$(get_neo4j_compose); then
+    MAIN_COMPOSE_FILES+=("-f" "$path")
+elif is_profile_active "neo4j"; then
     DEGRADED=1
 fi
 OVERRIDE_COMPOSE="$PROJECT_ROOT/docker-compose.override.yml"
