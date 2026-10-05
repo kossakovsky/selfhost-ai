@@ -439,6 +439,18 @@ get_open_webui_postgres_compose() {
     return 1
 }
 
+# Get the Neo4j Bolt port override (publishes 7687 on caddy) if the neo4j
+# profile is active and the file exists (issue #134)
+# Usage: path=$(get_neo4j_compose) && COMPOSE_FILES+=("-f" "$path")
+get_neo4j_compose() {
+    local compose_file="$PROJECT_ROOT/docker-compose.neo4j.yml"
+    if [ -f "$compose_file" ] && is_profile_active "neo4j"; then
+        echo "$compose_file"
+        return 0
+    fi
+    return 1
+}
+
 # Get Supabase compose file path if profile is active and file exists
 # Usage: path=$(get_supabase_compose) && COMPOSE_FILES+=("-f" "$path")
 get_supabase_compose() {
@@ -497,6 +509,11 @@ build_compose_files_array() {
         COMPOSE_FILES+=("-f" "$path")
     elif is_profile_active "open-webui" && [ "${OPEN_WEBUI_DATABASE:-}" = "postgres" ]; then
         log_error "OPEN_WEBUI_DATABASE=postgres but docker-compose.open-webui-postgres.yml is missing - Open WebUI will start on SQLite and appear EMPTY. Restore the file or set OPEN_WEBUI_DATABASE=sqlite in .env."
+    fi
+    if path=$(get_neo4j_compose); then
+        COMPOSE_FILES+=("-f" "$path")
+    elif is_profile_active "neo4j"; then
+        log_warning "neo4j profile is active but docker-compose.neo4j.yml is missing - Bolt (7687) is NOT published, so Neo4j Browser cannot connect. Restore it with: git checkout -- docker-compose.neo4j.yml"
     fi
     if path=$(get_supabase_compose); then
         COMPOSE_FILES+=("-f" "$path")
