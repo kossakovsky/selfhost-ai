@@ -670,12 +670,41 @@ gen_base64() {
     openssl rand -base64 "$bytes" | head -c "$length"
 }
 
-# Generate bcrypt hash using Caddy
-# Usage: hash=$(generate_bcrypt_hash "plaintext_password")
+# Caddy image that hashes basic-auth passwords, so no Caddy package is needed on
+# the host; same tag as the stack's caddy service, so its pulled image is reused
+CADDY_HASH_IMAGE="docker.io/library/caddy:2-alpine"
+
+# Print a bcrypt hash (password over stdin, never in ps); returns 1 if Docker
+# fails or the output is not bcrypt. Usage: hash=$(generate_bcrypt_hash "pw")
 generate_bcrypt_hash() {
-    local plaintext="$1"
-    if [[ -n "$plaintext" ]]; then
-        caddy hash-password --algorithm bcrypt --plaintext "$plaintext"
+    local plaintext="$1" hash
+    local bcrypt_re='^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$'
+    [[ -n "$plaintext" ]] || return 0
+    # --network none: hashing needs no network; the daemon still pulls a missing image
+    hash=$(printf '%s\n' "$plaintext" | docker run --rm -i --network none "$CADDY_HASH_IMAGE" \
+        caddy hash-password --algorithm bcrypt) || return 1
+    if [[ ! "$hash" =~ $bcrypt_re ]]; then
+        log_error "caddy hash-password returned no bcrypt hash (got ${#hash} characters)"
+        return 1
+    fi
+    printf '%s\n' "$hash"
+}
+
+# Installers before 1.16.4 added Caddy's Cloudsmith apt repository; it answers
+# 402 Payment Required, which makes every apt update fail until it is removed
+remove_legacy_caddy_apt_source() {
+    local f removed=false
+    for f in /etc/apt/sources.list.d/caddy-stable.list /usr/share/keyrings/caddy-stable-archive-keyring.gpg; do
+        if [[ -e "$f" ]]; then
+            if rm -f "$f"; then
+                removed=true
+            else
+                log_warning "Could not remove $f; apt update fails with 402 until it is gone: sudo rm -f $f"
+            fi
+        fi
+    done
+    if [[ "$removed" == true ]]; then
+        log_info "Removed the legacy Caddy apt repository (dl.cloudsmith.io answers 402)."
     fi
 }
 

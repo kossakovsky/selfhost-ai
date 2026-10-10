@@ -8,6 +8,7 @@
 # Features:
 #   - Generates cryptographically secure random values (passwords, secrets, keys)
 #   - Creates bcrypt hashes for Caddy basic auth using `caddy hash-password`
+#     from the Caddy Docker image
 #   - Preserves existing user-provided values in .env on re-run
 #   - Adds variables that are new in .env.example without regenerating existing
 #     ones; the --update flag apply_update.sh passes is accepted but never
@@ -43,6 +44,9 @@ require_command "openssl" "Please ensure openssl is installed and available in y
 # --- Configuration ---
 TEMPLATE_FILE="$PROJECT_ROOT/.env.example"
 OUTPUT_FILE="$PROJECT_ROOT/.env"
+
+# Services behind Caddy basic auth: <NAME>_PASSWORD is hashed into <NAME>_PASSWORD_HASH
+SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME" "INVOKEAI" "OPENCLAW")
 
 # Variables that get assigned the user's email address
 EMAIL_VARS=(
@@ -174,15 +178,22 @@ if [ -f "$OUTPUT_FILE" ]; then
     done < "$OUTPUT_FILE"
 fi
 
-# Install Caddy
-log_subheader "Installing Caddy"
-log_info "Adding Caddy repository and installing..."
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --yes --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
-apt install -y caddy
+remove_legacy_caddy_apt_source
+# Removed-but-not-purged packages stay known to dpkg; only a real install matters
+if [[ "$(dpkg-query -W -f='${Status}' caddy 2>/dev/null)" == "install ok installed" ]]; then
+    log_warning "A 'caddy' package is installed on the host; its caddy.service can hold port 80 and stop the stack's Caddy container. If an older installer left it behind, remove it with: apt purge caddy"
+fi
 
-# Check for caddy
-require_command "caddy" "Caddy installation failed. Please check the installation logs above."
+# Hashing runs in Docker: fail on a missing Docker or image before any prompt
+for service in "${SERVICES_NEEDING_HASH[@]}"; do
+    if [[ -z "${existing_env_vars[${service}_PASSWORD_HASH]}" ]]; then
+        if ! docker image inspect "$CADDY_HASH_IMAGE" >/dev/null 2>&1 && ! docker pull "$CADDY_HASH_IMAGE"; then
+            log_error "Cannot get $CADDY_HASH_IMAGE, which hashes the basic-auth passwords. Check that Docker runs (docker info) and Docker Hub is reachable, then re-run."
+            exit 1
+        fi
+        break
+    fi
+done
 
 require_whiptail
 
@@ -497,6 +508,22 @@ done
 
 # --- WAHA API KEY (sha512) --- (moved after .env write to avoid overwrite)
 
+# Hash basic-auth passwords before .env is rewritten, so a failure leaves it untouched
+for service in "${SERVICES_NEEDING_HASH[@]}"; do
+    hash_var="${service}_PASSWORD_HASH"
+    plain_pass="${generated_values[${service}_PASSWORD]}"
+    if [[ -z "${generated_values[$hash_var]}" && -n "$plain_pass" ]]; then
+        new_hash=$(generate_bcrypt_hash "$plain_pass") || new_hash=""
+        if [[ -z "$new_hash" ]]; then
+            # An empty hash would either break Caddy config parsing (username
+            # without hash) or silently lock the service behind a deny-all
+            log_error "Failed to generate bcrypt hash for ${service} with $CADDY_HASH_IMAGE (see the error above). .env was not changed; fix the cause and re-run."
+            exit 1
+        fi
+        generated_values["$hash_var"]="$new_hash"
+    fi
+done
+
 # Second pass: Substitute generated values referenced like ${VAR}
 # We'll process the substitutions line by line to avoid escaping issues
 
@@ -644,40 +671,14 @@ if [[ -n "$template_no_proxy" ]]; then
     _update_or_add_env_var "GOST_NO_PROXY" "$template_no_proxy"
 fi
 
-# Hash passwords using caddy with bcrypt (consolidated loop)
-SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" "COMFYUI" "PADDLEOCR" "RAGAPP" "LT" "DOCLING" "TEMPORAL_UI" "WELCOME" "INVOKEAI" "OPENCLAW")
-
 for service in "${SERVICES_NEEDING_HASH[@]}"; do
-    password_var="${service}_PASSWORD"
-    hash_var="${service}_PASSWORD_HASH"
-
-    plain_pass="${generated_values[$password_var]}"
-    existing_hash="${generated_values[$hash_var]}"
-
-    # If no hash exists but we have a plain password, generate new hash
-    if [[ -z "$existing_hash" && -n "$plain_pass" ]]; then
-        new_hash=$(generate_bcrypt_hash "$plain_pass")
-        if [[ -n "$new_hash" ]]; then
-            existing_hash="$new_hash"
-            generated_values["$hash_var"]="$new_hash"
-        else
-            # An empty hash would either break Caddy config parsing (username
-            # without hash) or silently lock the service behind a deny-all
-            log_error "Failed to generate bcrypt hash for ${service} - Caddy basic auth would be broken."
-            exit 1
-        fi
-    fi
-
-    _update_or_add_env_var "$hash_var" "$existing_hash"
+    _update_or_add_env_var "${service}_PASSWORD_HASH" "${generated_values[${service}_PASSWORD_HASH]}"
 done
 
 log_success ".env file generated successfully in the project root ($OUTPUT_FILE)."
 
 # Save installation ID for telemetry correlation
 save_installation_id "$OUTPUT_FILE"
-
-# Uninstall caddy
-apt remove -y caddy
 
 # Cleanup any .bak files
 cleanup_bak_files "$PROJECT_ROOT"

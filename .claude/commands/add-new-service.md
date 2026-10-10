@@ -338,7 +338,7 @@ This applies to ALL services, not just those using `<<: *proxy-env`. Internal se
 
 **File:** `scripts/03_generate_secrets.sh`
 
-### 4.1 VARS_TO_GENERATE Map (~line 75)
+### 4.1 VARS_TO_GENERATE Map (Configuration section at the top)
 
 Add password/secret generation:
 
@@ -353,7 +353,7 @@ Available types:
 - `jwt` - JWT secret
 - `hex:32` - Hex string
 
-### 4.2 EMAIL_VARS Array (~line 42)
+### 4.2 EMAIL_VARS Array (Configuration section at the top)
 
 If username should default to installer's email:
 
@@ -364,7 +364,7 @@ EMAIL_VARS=(
 )
 ```
 
-### 4.3 SERVICES_NEEDING_HASH Array (~line 554)
+### 4.3 SERVICES_NEEDING_HASH Array (Configuration section at the top)
 
 **CRITICAL for Basic Auth:** Add service to generate bcrypt hash:
 
@@ -374,7 +374,7 @@ SERVICES_NEEDING_HASH=("PROMETHEUS" "SEARXNG" ... "${SERVICE_NAME_UPPER}")
 
 This automatically:
 1. Reads `${SERVICE_NAME_UPPER}_PASSWORD` from `.env`
-2. Generates bcrypt hash via `docker exec caddy caddy hash-password`
+2. Generates bcrypt hash via `generate_bcrypt_hash` (`caddy hash-password` in a `docker run --rm` of the stack's Caddy image)
 3. Writes hash to `${SERVICE_NAME_UPPER}_PASSWORD_HASH` in `.env`
 
 ---
