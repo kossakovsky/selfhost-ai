@@ -26,6 +26,7 @@ export DEBIAN_FRONTEND=noninteractive
 # System Update
 log_subheader "System Update"
 log_info "Updating package list..."
+remove_legacy_caddy_apt_source
 apt update -y
 log_info "Enabling universe repository..."
 apt install -y software-properties-common

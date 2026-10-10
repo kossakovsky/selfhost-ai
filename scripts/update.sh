@@ -124,8 +124,12 @@ BACKUP_PATH=""
 set_telemetry_stage "git_system_packages"
 log_info "Updating system packages..."
 if command -v apt-get &> /dev/null; then
-    sudo apt-get update && sudo apt-get upgrade -y
-    log_info "System packages updated successfully."
+    remove_legacy_caddy_apt_source
+    if sudo apt-get update && sudo apt-get upgrade -y; then
+        log_info "System packages updated successfully."
+    else
+        log_warning "System package update failed (see the apt errors above); continuing with the service update."
+    fi
 else
     log_warning "'apt-get' not found. Skipping system package update. This is normal on non-debian systems."
 fi

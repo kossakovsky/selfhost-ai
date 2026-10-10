@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.16.4] - 2026-10-10
+
+### Fixed
+- **Installer** - `make update` and re-running the installer on an existing host aborted with `402 Payment Required`: `03_generate_secrets.sh` installed the `caddy` package from Caddy's Cloudsmith apt repository on every run just to hash basic-auth passwords, and that repository no longer serves packages or its index. Hashes now come from `caddy hash-password` in the `caddy:2-alpine` image the stack already runs (`docker run --rm`, password over stdin), so no Caddy package is installed on the host. The output is checked to be a bcrypt hash, and hashes are computed before `.env` is rewritten, so a Docker failure leaves `.env` untouched. The leftover Cloudsmith apt source and key are removed before `apt update` runs. The `make update` that installs 1.16.4 still runs the previous `update.sh`: its `apt-get update` prints the 402 errors once and skips the OS package upgrade for that run, while the update itself continues; the next `make update` upgrades packages as usual, and a failed package update is now reported as a warning instead of "updated successfully". A `caddy` package an aborted older run left installed on the host (its `caddy.service` can hold port 80) is reported with `apt purge caddy`, not removed. Existing hashes in `.env` are kept as they are.
+
 ## [1.16.3] - 2026-10-10
 
 ### Fixed

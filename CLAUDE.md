@@ -246,7 +246,7 @@ Complex services like Supabase and Dify maintain their own upstream docker-compo
 
 The `scripts/03_generate_secrets.sh` script:
 - Generates random passwords, JWT secrets, API keys, and encryption keys
-- Creates bcrypt password hashes using Caddy's `hash-password` command
+- Creates bcrypt password hashes with `generate_bcrypt_hash` (`caddy hash-password` in a `docker run --rm` of the stack's Caddy image). Never install a Caddy package on the host: the stack's Caddy runs in Docker, the distro package's `caddy.service` takes port 80, and Caddy's Cloudsmith apt repository answers 402. Missing hashes are computed before `.env` is rewritten, so a failure leaves `.env` untouched; when any hash is missing, Docker and the image are checked before the first prompt
 - Preserves existing user-provided values in `.env`
 - Supports different secret types via `VARS_TO_GENERATE` map: `password:32`, `jwt`, `api_key`, `base64:64`, `hex:32`
 - Preserves existing values on every run; the `--update` flag passed during updates is accepted but never parsed
@@ -262,7 +262,8 @@ Key functions:
 - `update_compose_profiles "profile1,profile2"` - Update COMPOSE_PROFILES in .env
 - `remove_compose_profile "$list" "profile"` - Print a comma list without one profile (space-tolerant)
 - `gen_password 32` / `gen_hex 64` / `gen_base64 64` - Secret generation
-- `generate_bcrypt_hash "password"` - Create Caddy-compatible bcrypt hash (uses Caddy binary)
+- `generate_bcrypt_hash "password"` - Create Caddy-compatible bcrypt hash: password over stdin to `CADDY_HASH_IMAGE` (keep in sync with the `caddy` service), output validated as bcrypt
+- `remove_legacy_caddy_apt_source` - Remove the Cloudsmith Caddy apt source/key pre-1.16.4 installers added; called before `apt update` in 01 and `update.sh`, and in 03
 - `json_escape "string"` - Escape string for JSON output
 - `wt_input`, `wt_password`, `wt_yesno`, `wt_msg` - Whiptail dialog wrappers
 - `wt_checklist`, `wt_radiolist`, `wt_menu` - Whiptail selection dialogs
@@ -411,8 +412,7 @@ These are backed up before `git reset --hard` and restored after.
 - Verify `LETSENCRYPT_EMAIL` is set in `.env`
 
 ### Password hash generation fails
-- Ensure Caddy container is running: `docker compose -p localai up -d caddy`
-- Script uses: `docker exec caddy caddy hash-password --plaintext "$password"`
+- The hash comes from `docker run --rm -i --network none "$CADDY_HASH_IMAGE" caddy hash-password --algorithm bcrypt` (password on stdin; `CADDY_HASH_IMAGE` in `scripts/utils.sh`). The Caddy container does not need to run, but Docker must, and the image must be present or pullable. Check: `printf 'test\n' | docker run --rm -i caddy:2-alpine caddy hash-password`
 
 ## File Locations
 
