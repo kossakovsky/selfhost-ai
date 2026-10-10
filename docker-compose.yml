@@ -1204,13 +1204,15 @@ services:
     profiles: ["crawl4ai"]
     restart: unless-stopped
     shm_size: 1g # Recommended for browser operations
-    env_file:
-      - .env
+    # No 'env_file: .env' here: it would hand every secret of the stack to the
+    # crawler. Pass the variables it needs explicitly.
     environment:
       <<: *proxy-env
       # Without a token Crawl4AI 0.9+ binds 127.0.0.1 only and is unreachable
       # from other containers; with it the API listens on the Docker network.
       CRAWL4AI_API_TOKEN: "${CRAWL4AI_API_TOKEN}"
+      # Key for the default LLM provider (openai/gpt-4o-mini).
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
     deploy:
       resources:
         limits:

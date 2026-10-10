@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.16.3] - 2026-10-10
+
+### Fixed
+- **Crawl4AI (security)** - The `crawl4ai` service loaded the whole `.env` via `env_file`, so the crawler container received every variable of the stack, including all secrets (Postgres, JWT/Supabase, n8n, Open Terminal, Qdrant/Weaviate, OpenClaw, Cloudflare Tunnel, the GOST upstream proxy and more). It now gets only `CRAWL4AI_API_TOKEN`, `OPENAI_API_KEY` and the proxy variables; the next `make update` or `make restart` recreates it without the rest. If you added other Crawl4AI settings to `.env` (another LLM provider key, `LLM_PROVIDER`, `CRAWL4AI_*`), move them to `crawl4ai.environment` in `docker-compose.override.yml`. If you have been running the `crawl4ai` profile, treat those values as exposed: rotate external credentials (Cloudflare Tunnel token, OpenRouter and other API keys, bot tokens, SMTP) at the provider; to rotate `OPEN_TERMINAL_API_KEY`, empty it in `.env`, run `make update` (it generates a new key) and re-enter it in Open WebUI under Admin Settings → Integrations → Open Terminal. `POSTGRES_PASSWORD`, `JWT_SECRET` and `N8N_ENCRYPTION_KEY` cannot be rotated by just editing `.env`: Postgres keeps its password in the data volume, `ANON_KEY`/`SERVICE_ROLE_KEY` are signed with `JWT_SECRET`, and a new `N8N_ENCRYPTION_KEY` makes stored n8n credentials unreadable (issue #137).
+
 ## [1.16.2] - 2026-10-05
 
 ### Fixed
