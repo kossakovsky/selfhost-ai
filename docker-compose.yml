@@ -1173,8 +1173,11 @@ services:
     mem_reservation: 256m
     cpus: "1.0"
     command:
-      - --housekeeping_interval=10s
+      - --housekeeping_interval=30s
       - --docker_only=true
+      # disk (du over every container's layers) is costly with many images. The flag
+      # replaces cAdvisor's default list, so it repeats the v0.55.1 one; re-sync on bumps.
+      - --disable_metrics=advtcp,cpu_topology,cpuset,disk,diskIO,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw

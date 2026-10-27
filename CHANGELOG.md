@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.18.2] - 2026-10-27
+
+### Fixed
+- **cAdvisor** - On small hosts with many Docker images (for example 4 vCPU / 6 GiB RAM with 30 GB of images) cAdvisor sat at its 1 GiB memory limit and swapped continuously, using up to a full CPU core and pushing the host's CPU usage high enough to trigger hosting providers' CPU alerts. It came mainly from its `disk` metrics, which measure every container's layers on disk, together with a 10s housekeeping interval. cAdvisor now runs with `--housekeeping_interval=30s` and with the `disk` and `diskIO` metrics disabled; the `container_fs_*` and `container_blkio_*` metrics are gone, and none of the bundled dashboards or alerts use them. To get them back, copy the cAdvisor `command:` from `docker-compose.yml` into `docker-compose.override.yml` and remove `disk,diskIO` from its `--disable_metrics`. If you applied the workaround from the issue, remove its `command:` from `docker-compose.override.yml`: its `--disable_metrics=disk,diskIO` replaces cAdvisor's own list of disabled metrics and turns back on the costly ones cAdvisor keeps off by default (per-process, TCP/UDP, referenced memory and others). Its `mem_limit: 2g` and `mem_reservation: 512m` should not be needed either: with the workaround, which collects more than the new defaults, cAdvisor dropped from 1 GiB to 45 MiB on the reporting host (issue #150).
+
 ## [1.18.1] - 2026-10-19
 
 ### Fixed
